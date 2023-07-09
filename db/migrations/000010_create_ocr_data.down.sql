@@ -1,0 +1,1 @@
+DROP TABLE ekyc_schema.ocr_data

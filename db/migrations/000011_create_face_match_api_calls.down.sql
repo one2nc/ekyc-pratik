@@ -1,0 +1,1 @@
+DROP TABLE ekyc_schema.face_match_api_calls
