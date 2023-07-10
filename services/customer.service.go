@@ -24,6 +24,15 @@ func (c *CustomerService) GetCustomerByEmail(email string) (model.Customer,error
 	}
 	return customer , nil
 }
+func (c *CustomerService) GetCustomerByCredendials(accessKey string,secretKey string) (model.Customer,error) {
+
+	customer,err := c.customerRepository.GetCustomerByCredendials(accessKey,secretKey)
+	if err != nil {
+		return customer,err
+
+	}
+	return customer , nil
+}
 func newCustomerService(customerRepository *repository.CustomerRepository) *CustomerService {
 	return &CustomerService{
 		customerRepository: customerRepository,

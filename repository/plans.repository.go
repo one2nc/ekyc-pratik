@@ -3,6 +3,7 @@ package repository
 import (
 	"go-ekyc/model"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -19,6 +20,13 @@ func (c *PlansRepository) FetchAllPlans() ([]model.Plan,error) {
 func (c *PlansRepository) FetchPlansByName(name string) (model.Plan,error) {
 	var plan model.Plan
 	result := c.dbInstance.Where("plan_name = ?", name).First(&plan)
+
+    
+	return plan,result.Error
+}
+func (c *PlansRepository) FetchPlanById(id uuid.UUID) (model.Plan,error) {
+	var plan model.Plan
+	result := c.dbInstance.Where("id = ?", id).First(&plan)
 
     
 	return plan,result.Error

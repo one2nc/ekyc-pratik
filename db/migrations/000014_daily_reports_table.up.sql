@@ -1,7 +1,7 @@
 CREATE TABLE ekyc_schema.daily_reports_table (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY NOT NULL,
     customer_id UUID DEFAULT uuid_generate_v4() NOT NULL REFERENCES ekyc_schema.customers (id),
-    start_date TIMESTAMP NOT NULL,
+    date_of_report TIMESTAMP NOT NULL,
     daily_base_charges FLOAT NOT NULL,
     no_of_face_match INTEGER NOT NULL,
     total_cost_of_face_match FLOAT NOT NULL,

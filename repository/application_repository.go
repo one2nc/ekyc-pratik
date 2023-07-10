@@ -7,6 +7,7 @@ import (
 type ApplicationRepository struct {
 	CustomerRepository *CustomerRepository
 	PlansRepository    *PlansRepository
+	ImageRepository    *ImageRepository
 }
 
 func NewApplicationRepository() (*ApplicationRepository, error) {
@@ -18,5 +19,6 @@ func NewApplicationRepository() (*ApplicationRepository, error) {
 	return &ApplicationRepository{
 		CustomerRepository: newCustomerRepository(db),
 		PlansRepository:    newPlansRepository(db),
+		ImageRepository:    newImageRepository(db),
 	}, nil
 }

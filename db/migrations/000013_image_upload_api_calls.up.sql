@@ -6,3 +6,5 @@ CREATE TABLE ekyc_schema.image_upload_api_calls (
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL
 );
+
+

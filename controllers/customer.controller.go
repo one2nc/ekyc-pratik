@@ -24,14 +24,14 @@ func (cc *CustomerControllers) RegisterCustomer(c *gin.Context) {
 	var signupRequest SignupRequest
 
 	if err := c.ShouldBindJSON(&signupRequest); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"errorMessage": err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessage": err.Error()})
 		return
 	}
 
 	plan, err := cc.PlansService.FetchPlansByName(signupRequest.Plan)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"errorMessage": err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessage": err.Error()})
 		return
 	}
 
@@ -45,13 +45,13 @@ func (cc *CustomerControllers) RegisterCustomer(c *gin.Context) {
 
 	customer, err := cc.CustomerService.GetCustomerByEmail(customerData.Email)
 	if err != nil && err.Error() != gorm.ErrRecordNotFound.Error() {
-		c.JSON(http.StatusBadRequest, gin.H{
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"errorMessage": err.Error(),
 		})
 		return
 	}
 	if customer != (model.Customer{}) {
-		c.JSON(http.StatusBadRequest, gin.H{
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"errorMessage": "Email Already taken",
 		})
 		return
@@ -60,13 +60,13 @@ func (cc *CustomerControllers) RegisterCustomer(c *gin.Context) {
 	err = cc.CustomerService.CreateCustomer(&customerData)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"errorMessage": err.Error(),
 		})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
+	c.AbortWithStatusJSON(http.StatusOK, gin.H{
 		"secretKey": customerData.SecretKey,
 		"accessKey": customerData.AccessKey,
 	})

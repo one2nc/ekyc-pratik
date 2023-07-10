@@ -12,3 +12,17 @@ services:
       - POSTGRES_PASSWORD=password
     volumes:
       - ./data:/var/lib/postgresql/data
+  minio:
+    image: minio/minio
+    container_name: minio
+    restart: always
+    ports:
+      - 9000:9000
+      - 9001:9001
+    environment:
+      - MINIO_BROWSER=on
+      - MINIO_ROOT_USER=pratik
+      - MINIO_ROOT_PASSWORD=pratik123
+    volumes:
+      - ./minio-data:/data
+    command: server --console-address ":9001" /data
