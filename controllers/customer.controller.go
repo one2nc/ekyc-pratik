@@ -35,12 +35,14 @@ func (cc *CustomerControllers) RegisterCustomer(c *gin.Context) {
 		return
 	}
 
+	accessKey := helper.GenerateRandomString(10)
+	secretKey := helper.GenerateRandomString(20)
 	customerData := model.Customer{
 		Name:      signupRequest.Name,
 		Email:     signupRequest.Email,
 		PlanID:    plan.ID,
-		AccessKey: helper.GenerateRandomString(10),
-		SecretKey: helper.GenerateRandomString(20),
+		AccessKey: helper.GetMD5Hash(accessKey),
+		SecretKey: helper.GetMD5Hash(secretKey),
 	}
 
 	customer, err := cc.CustomerService.GetCustomerByEmail(customerData.Email)
@@ -67,8 +69,8 @@ func (cc *CustomerControllers) RegisterCustomer(c *gin.Context) {
 	}
 
 	c.AbortWithStatusJSON(http.StatusOK, gin.H{
-		"secretKey": customerData.SecretKey,
-		"accessKey": customerData.AccessKey,
+		"secretKey": secretKey,
+		"accessKey": accessKey,
 	})
 
 }

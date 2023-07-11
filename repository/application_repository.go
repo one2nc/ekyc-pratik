@@ -5,9 +5,10 @@ import (
 )
 
 type ApplicationRepository struct {
-	CustomerRepository *CustomerRepository
-	PlansRepository    *PlansRepository
-	ImageRepository    *ImageRepository
+	CustomerRepository       *CustomerRepository
+	PlansRepository          *PlansRepository
+	ImageRepository          *ImageRepository
+	FaceMatchScoreRepository *FaceMatchScoreRepository
 }
 
 func NewApplicationRepository() (*ApplicationRepository, error) {
@@ -17,8 +18,9 @@ func NewApplicationRepository() (*ApplicationRepository, error) {
 	}
 
 	return &ApplicationRepository{
-		CustomerRepository: newCustomerRepository(db),
-		PlansRepository:    newPlansRepository(db),
-		ImageRepository:    newImageRepository(db),
+		CustomerRepository:       newCustomerRepository(db),
+		PlansRepository:          newPlansRepository(db),
+		ImageRepository:          newImageRepository(db),
+		FaceMatchScoreRepository: newFaceMatchScoreRepository(db),
 	}, nil
 }

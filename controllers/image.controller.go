@@ -10,13 +10,15 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type ImageControllers struct {
-	CustomerService service.CustomerService
-	PlansService    service.PlansService
-	ImageService    service.ImageService
-	MinioService    service.MinioService
+	CustomerService       service.CustomerService
+	PlansService          service.PlansService
+	ImageService          service.ImageService
+	MinioService          service.MinioService
+	FaceMatchScoreService service.FaceMatchScoreService
 }
 
 func (i *ImageControllers) UplaodImage(c *gin.Context) {
@@ -101,11 +103,96 @@ func (i *ImageControllers) UplaodImage(c *gin.Context) {
 	_ = i.ImageService.CreateImageUploadAPICall(&imageUploadAPICall)
 
 }
+func (i *ImageControllers) FaceMatch(c *gin.Context) {
+	customer, _ := c.Get("customer")
+	customerModel := model.Customer{}
+	customerModel = customer.(model.Customer)
+	type FaceMatchRequest struct {
+		ImageId1 string `json:"image_id_1" binding:"required,uuid"`
+		ImageId2 string `json:"image_id_2" binding:"required,uuid"`
+	}
 
-func newImageController(customerService *service.CustomerService, plansService *service.PlansService, imageService *service.ImageService) *ImageControllers {
+	var faceMatchRequest FaceMatchRequest
+
+	if err := c.ShouldBindJSON(&faceMatchRequest); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessage": err.Error()})
+		return
+	}
+
+	if faceMatchRequest.ImageId1 == faceMatchRequest.ImageId2 {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessage": "Cannot use same ids"})
+		return
+	}
+	// fetch plan for calculations
+	plan, err := i.PlansService.FetchPlanById(customerModel.PlanID)
+	fmt.Println(plan.ID)
+	fmt.Println(faceMatchRequest)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessage": "Failed to fetch plan"})
+		return
+	}
+
+	images, err := i.ImageService.FindImageForCustomer([]string{faceMatchRequest.ImageId1, faceMatchRequest.ImageId2}, customerModel.ID.String())
+
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessage": err.Error()})
+		return
+	}
+	if len(images) != 2 {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessage": "Invalid image ids"})
+		return
+	}
+
+	if !helper.IsImagesComparable(images[0], images[1]) {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessage": "Invalid image type"})
+		return
+	}
+
+	faceMatchScoreRecord, err := i.FaceMatchScoreService.FetchScoreByImageAndCustomerId(faceMatchRequest.ImageId1, faceMatchRequest.ImageId2, customerModel.ID.String())
+
+	if err != nil {
+		if gorm.ErrRecordNotFound.Error() != err.Error() {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessage": err.Error()})
+			return
+		}
+
+	}
+
+	if faceMatchScoreRecord == nil {
+		score := i.ImageService.GenerateFacteMatchScore()
+
+		faceMatchScoreRecord = &model.FaceMatchScore{
+			CustomerID: customerModel.ID,
+			ImageID1:   images[0].ID,
+			ImageID2:   images[1].ID,
+			Score:      score,
+		}
+
+		err = i.FaceMatchScoreService.CreateFaceMatchScore(faceMatchScoreRecord)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessage": err.Error()})
+			return
+		}
+	}
+	faceMatchApiData := model.FaceMatchAPICall{
+		CustomerID:     customerModel.ID,
+		ScoreID:        faceMatchScoreRecord.ID,
+		APICallCharges: plan.FaceMatchCost,
+	}
+	err = i.FaceMatchScoreService.CreateFaceMatchScoreAPIRecord(&faceMatchApiData)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessage": err.Error()})
+		return
+	}
+	c.AbortWithStatusJSON(http.StatusCreated, gin.H{"faceMatchScore": faceMatchScoreRecord.Score})
+
+}
+
+func newImageController(customerService *service.CustomerService, plansService *service.PlansService, imageService *service.ImageService, faceMatchScoreService *service.FaceMatchScoreService) *ImageControllers {
 	return &ImageControllers{
-		CustomerService: *customerService,
-		PlansService:    *plansService,
-		ImageService:    *imageService,
+		CustomerService:       *customerService,
+		PlansService:          *plansService,
+		ImageService:          *imageService,
+		FaceMatchScoreService: *faceMatchScoreService,
 	}
 }

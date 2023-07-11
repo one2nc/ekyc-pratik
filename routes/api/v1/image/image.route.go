@@ -9,10 +9,13 @@ import (
 
 func RegisterImageRoutes(v1Group *gin.RouterGroup, appController *controllers.ApplicationController) {
 	imageController := appController.ImageController
-	authGroup := v1Group.Group("/image")
+	imageGroup := v1Group.Group("/image")
 	{
-		authGroup.POST("/upload",
+		imageGroup.POST("/upload",
 			middlewares.AuthMiddleware(&imageController.CustomerService),
 			imageController.UplaodImage)
+		imageGroup.POST("/face-match",
+			middlewares.AuthMiddleware(&imageController.CustomerService),
+			imageController.FaceMatch)
 	}
 }

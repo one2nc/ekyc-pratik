@@ -7,6 +7,7 @@ type ApplicationService struct {
 	PlansService *PlansService
 	ImageService *ImageService
 	MinioService *MinioService
+	FaceMatchScoreService *FaceMatchScoreService
 }
 
 func NewApplicationService(applicationRepository *repository.ApplicationRepository) *ApplicationService {
@@ -15,5 +16,6 @@ func NewApplicationService(applicationRepository *repository.ApplicationReposito
 		CustomerService: newCustomerService(applicationRepository.CustomerRepository),
 		PlansService: newPlansService(applicationRepository.PlansRepository),
 		ImageService: newImageService(applicationRepository.ImageRepository),
+		FaceMatchScoreService: newFaceMatchScoreService(applicationRepository.FaceMatchScoreRepository),
 	}
 }

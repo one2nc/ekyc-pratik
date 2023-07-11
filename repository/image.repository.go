@@ -24,6 +24,14 @@ func (i *ImageRepository) CreateImageUploadRecord(imageUploadData *model.ImageUp
 
 	return result.Error
 }
+func (i *ImageRepository) FindImagesByIdForCustomer(imageIds []string, customerId string) ([]model.Image, error) {
+	
+	images := []model.Image{}
+
+	result := i.dbInstance.Where("id IN (?) AND customer_id = ? ", imageIds, customerId).Find(&images)
+	return images, result.Error
+}
+
 
 func newImageRepository(db *gorm.DB) *ImageRepository {
 	return &ImageRepository{
