@@ -2,6 +2,8 @@ module go-ekyc
 
 go 1.18
 
+require gorm.io/datatypes v1.2.0
+
 require (
 	cloud.google.com/go v0.110.3 // indirect
 	cloud.google.com/go/compute v1.20.1 // indirect
@@ -60,6 +62,7 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/gin-gonic/gin v1.9.1 // indirect
+	github.com/go-faker/faker/v4 v4.1.1 // indirect
 	github.com/go-ini/ini v1.67.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
@@ -178,6 +181,7 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
+	gorm.io/driver/mysql v1.4.7 // indirect
 	gorm.io/driver/postgres v1.5.2 // indirect
 	gorm.io/gorm v1.25.2 // indirect
 	lukechampine.com/uint128 v1.3.0 // indirect

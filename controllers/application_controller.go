@@ -9,7 +9,7 @@ type ApplicationController struct {
 
 func NewApplicationController(applicationService *service.ApplicationService) *ApplicationController {
 	return &ApplicationController{
-		ImageController:    newImageController(applicationService.CustomerService, applicationService.PlansService, applicationService.ImageService, applicationService.FaceMatchScoreService),
+		ImageController:    newImageController(applicationService.CustomerService, applicationService.PlansService, applicationService.ImageService, applicationService.FaceMatchScoreService,applicationService.OCRService),
 		CustomerController: newCustomerController(applicationService.CustomerService, applicationService.PlansService),
 	}
 }

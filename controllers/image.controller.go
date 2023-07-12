@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
 	"go-ekyc/helper"
 	"go-ekyc/model"
@@ -10,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
@@ -19,6 +21,7 @@ type ImageControllers struct {
 	ImageService          service.ImageService
 	MinioService          service.MinioService
 	FaceMatchScoreService service.FaceMatchScoreService
+	OCRService            service.OCRService
 }
 
 func (i *ImageControllers) UplaodImage(c *gin.Context) {
@@ -187,12 +190,106 @@ func (i *ImageControllers) FaceMatch(c *gin.Context) {
 	c.AbortWithStatusJSON(http.StatusCreated, gin.H{"faceMatchScore": faceMatchScoreRecord.Score})
 
 }
+func (i *ImageControllers) GetOcrData(c *gin.Context) {
+	customer, _ := c.Get("customer")
+	customerModel := model.Customer{}
+	customerModel = customer.(model.Customer)
+	type OCRDataRequest struct {
+		ImageId1 string `json:"image_id" binding:"required,uuid"`
+	}
 
-func newImageController(customerService *service.CustomerService, plansService *service.PlansService, imageService *service.ImageService, faceMatchScoreService *service.FaceMatchScoreService) *ImageControllers {
+	var ocrRequest OCRDataRequest
+
+	if err := c.ShouldBindJSON(&ocrRequest); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessage": err.Error()})
+		return
+	}
+
+	// fetch plan for calculations
+	plan, err := i.PlansService.FetchPlanById(customerModel.PlanID)
+
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessage": "Failed to fetch plan"})
+		return
+	}
+
+	images, err := i.ImageService.FindImageForCustomer([]string{ocrRequest.ImageId1}, customerModel.ID.String())
+
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessage": err.Error()})
+		return
+	}
+	if len(images) != 1 {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessage": "Invalid image id"})
+		return
+	}
+
+	if images[0].ImageType != "id_card" {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessage": "OCR can be done only on image of type ID"})
+		return
+	}
+
+	ocrData, err := i.OCRService.GetOCRData(ocrRequest.ImageId1, customerModel.ID.String())
+fmt.Println(ocrData)
+	if err != nil {
+		fmt.Println(err)
+		if gorm.ErrRecordNotFound.Error() != err.Error() {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessage": err.Error()})
+			return
+		}
+
+	}
+
+	if ocrData == nil {
+
+		data, err := i.OCRService.OCRExtractData()
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessage": "Error while extracting data"})
+			return
+		}
+		jsonData, err := json.Marshal(data)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessage": "Error while extracting data"})
+			return
+		}
+		ocrData = &model.OCRData{
+			CustomerID: customerModel.ID,
+			ImageID1:   images[0].ID,
+			OCRData:    datatypes.JSON(jsonData),
+		}
+
+		err = i.OCRService.CreateOCRData(ocrData)
+
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessage": err.Error()})
+			return
+		}
+	}
+
+	ocrAPICallData := &model.OCRAPICalls{
+		CustomerID:     customerModel.ID,
+		ImageID:        images[0].ID,
+		OCRID:          ocrData.ID,
+		APICallCharges: plan.OCRCost,
+	}
+
+	err = i.OCRService.CreateOcrAPICall(ocrAPICallData)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessage": err.Error()})
+		return
+	}
+	c.AbortWithStatusJSON(http.StatusCreated, gin.H{
+		"data": ocrData.OCRData,
+	})
+
+}
+
+func newImageController(customerService *service.CustomerService, plansService *service.PlansService, imageService *service.ImageService, faceMatchScoreService *service.FaceMatchScoreService, ocrService *service.OCRService) *ImageControllers {
 	return &ImageControllers{
 		CustomerService:       *customerService,
 		PlansService:          *plansService,
 		ImageService:          *imageService,
 		FaceMatchScoreService: *faceMatchScoreService,
+		OCRService:            *ocrService,
 	}
 }

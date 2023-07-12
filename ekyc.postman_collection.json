@@ -11,8 +11,29 @@
 				{
 					"name": "signup",
 					"request": {
-						"method": "GET",
-						"header": []
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\":\"pratik\",\n    \"plan\":\"basic\",\n    \"email\":\"p1@g.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/api/v1/auth/signup",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"signup"
+							]
+						}
 					},
 					"response": []
 				}
@@ -24,16 +45,126 @@
 				{
 					"name": "face-match",
 					"request": {
-						"method": "GET",
-						"header": []
+						"method": "POST",
+						"header": [
+							{
+								"key": "Access-Key",
+								"value": "{{access_key}}",
+								"type": "default"
+							},
+							{
+								"key": "Secret-Key",
+								"value": "{{secret_key}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"image_id_1\":\"c837da4e-52f4-4b9f-90fd-1410430584b6\",\n    \"image_id_2\":\"c87ee9b4-22f6-4ed6-ae1f-86eeab349d21\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/api/v1/image/face-match",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"image",
+								"face-match"
+							]
+						}
 					},
 					"response": []
 				},
 				{
 					"name": "upload",
 					"request": {
-						"method": "GET",
-						"header": []
+						"method": "POST",
+						"header": [
+							{
+								"key": "Access-Key",
+								"value": "{{access_key}}",
+								"type": "default"
+							},
+							{
+								"key": "Secret-Key",
+								"value": "{{secret_key}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "image",
+									"type": "file",
+									"src": "/Users/chinmay/Downloads/test_face_image.jpeg"
+								},
+								{
+									"key": "image_type",
+									"value": "id_card",
+									"type": "default"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseURL}}/api/v1/image/upload",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"image",
+								"upload"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ocr",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Access-Key",
+								"value": "{{access_key}}",
+								"type": "default"
+							},
+							{
+								"key": "Secret-Key",
+								"value": "{{secret_key}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"image_id\":\"366b120f-f4c2-4fd2-bbe2-339807a653e5\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/api/v1/image/ocr",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"image",
+								"ocr"
+							]
+						}
 					},
 					"response": []
 				}

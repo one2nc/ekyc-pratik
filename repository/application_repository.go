@@ -9,6 +9,7 @@ type ApplicationRepository struct {
 	PlansRepository          *PlansRepository
 	ImageRepository          *ImageRepository
 	FaceMatchScoreRepository *FaceMatchScoreRepository
+	OCRRepository            *OCRRepository
 }
 
 func NewApplicationRepository() (*ApplicationRepository, error) {
@@ -22,5 +23,6 @@ func NewApplicationRepository() (*ApplicationRepository, error) {
 		PlansRepository:          newPlansRepository(db),
 		ImageRepository:          newImageRepository(db),
 		FaceMatchScoreRepository: newFaceMatchScoreRepository(db),
+		OCRRepository:            newOCRRepositoty(db),
 	}, nil
 }

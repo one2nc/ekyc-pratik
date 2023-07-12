@@ -17,5 +17,8 @@ func RegisterImageRoutes(v1Group *gin.RouterGroup, appController *controllers.Ap
 		imageGroup.POST("/face-match",
 			middlewares.AuthMiddleware(&imageController.CustomerService),
 			imageController.FaceMatch)
+		imageGroup.POST("/ocr",
+			middlewares.AuthMiddleware(&imageController.CustomerService),
+			imageController.GetOcrData)
 	}
 }
