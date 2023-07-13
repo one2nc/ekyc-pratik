@@ -6,8 +6,9 @@ import (
 )
 
 type dbConfig struct {
-	connString    string
-	migrationFile string
+	dbHost, dbPassword, dbUser, dbName, dbPort string
+	connString                                 string
+	migrationFile                              string
 }
 
 func newDbConfig() dbConfig {
@@ -23,6 +24,11 @@ func newDbConfig() dbConfig {
 	migrationFile := fmt.Sprintf("file://%s",
 		dbMigrationFile)
 	dbConfig := dbConfig{
+		dbHost:        dbHost,
+		dbPassword:    dbPassword,
+		dbUser:        dbUser,
+		dbName:        dbName,
+		dbPort:        dbPort,
 		connString:    connectionString,
 		migrationFile: migrationFile,
 	}

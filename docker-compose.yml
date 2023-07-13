@@ -21,8 +21,8 @@ services:
       - 9001:9001
     environment:
       - MINIO_BROWSER=on
-      - MINIO_ROOT_USER=pratik
-      - MINIO_ROOT_PASSWORD=pratik123
+      - MINIO_ROOT_USER=root
+      - MINIO_ROOT_PASSWORD=password
     volumes:
       - ./minio-data:/data
     command: server --console-address ":9001" /data

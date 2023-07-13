@@ -27,7 +27,7 @@ func dbMigrationUP(dbConfig dbConfig) error {
 	}
 
 	// Set up migration source
-	m, err := migrate.NewWithDatabaseInstance(dbConfig.migrationFile, "postgres", driver)
+	m, err := migrate.NewWithDatabaseInstance(dbConfig.migrationFile, dbConfig.dbName, driver)
 	if err != nil {
 		return err
 	}
