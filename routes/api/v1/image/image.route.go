@@ -1,13 +1,13 @@
 package image
 
 import (
-	"go-ekyc/controllers"
+	"go-ekyc/handlers"
 	"go-ekyc/middlewares"
 
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterImageRoutes(v1Group *gin.RouterGroup, appController *controllers.ApplicationController) {
+func RegisterImageRoutes(v1Group *gin.RouterGroup, appController *handlers.ApplicationController) {
 	imageController := appController.ImageController
 	imageGroup := v1Group.Group("/image")
 	{

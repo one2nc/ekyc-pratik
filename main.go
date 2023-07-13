@@ -1,7 +1,7 @@
 package main
 
 import (
-	"go-ekyc/controllers"
+	"go-ekyc/handlers"
 	"go-ekyc/repository"
 	"go-ekyc/server"
 	service "go-ekyc/services"
@@ -25,7 +25,7 @@ func main() {
 
 	appService := service.NewApplicationService(applicationRepository)
 
-	appController := controllers.NewApplicationController(appService)
+	appController := handlers.NewApplicationController(appService)
 
 	serverConfig := server.ServerConfig{
 		Port:    os.Getenv("SERVER_PORT"),

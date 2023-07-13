@@ -1,4 +1,4 @@
-package controllers
+package handlers
 
 import service "go-ekyc/services"
 
@@ -9,7 +9,7 @@ type ApplicationController struct {
 
 func NewApplicationController(applicationService *service.ApplicationService) *ApplicationController {
 	return &ApplicationController{
-		ImageController:    newImageController(applicationService.CustomerService, applicationService.PlansService, applicationService.ImageService, applicationService.FaceMatchScoreService,applicationService.OCRService),
+		ImageController:    newImageController(applicationService.CustomerService, applicationService.ImageService),
 		CustomerController: newCustomerController(applicationService.CustomerService, applicationService.PlansService),
 	}
 }
