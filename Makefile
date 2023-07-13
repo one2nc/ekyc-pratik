@@ -3,3 +3,5 @@ setup:
 run:
 	@go build
 	@./go-ekyc
+setup-down:
+	@docker-compose down

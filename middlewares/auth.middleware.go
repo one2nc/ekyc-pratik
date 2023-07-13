@@ -22,7 +22,7 @@ func AuthMiddleware(customerService *service.CustomerService) func(*gin.Context)
 
 		customer, err := customerService.GetCustomerByCredendials(helper.GetMD5Hash(accessKey), helper.GetMD5Hash(secretKey))
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusOK, gin.H{
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"errorMessage": err.Error(),
 			})
 

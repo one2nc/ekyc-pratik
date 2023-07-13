@@ -10,12 +10,35 @@
 			"item": [
 				{
 					"name": "signup",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"baseURL\",\"http://127.0.0.1:3000\");",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody)",
+									"pm.environment.set(\"access_key\", jsonData.access_key);",
+									"pm.environment.set(\"secret_key\", jsonData.secret_key);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\":\"pratik\",\n    \"plan\":\"basic\",\n    \"email\":\"p1@g.com\"\n}",
+							"raw": "{\n    \"name\":\"pratik\",\n    \"plan\":\"basic\",\n    \"email\":\"p8@g.com\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -44,6 +67,18 @@
 			"item": [
 				{
 					"name": "face-match",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"baseURL\",\"http://127.0.0.1:3000\");",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -84,6 +119,18 @@
 				},
 				{
 					"name": "upload",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"baseURL\",\"http://127.0.0.1:3000\");",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -130,6 +177,27 @@
 				},
 				{
 					"name": "ocr",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"baseURL\",\"http://127.0.0.1:3000\");",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [

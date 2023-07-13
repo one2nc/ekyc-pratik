@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"go-ekyc/model"
 	"go-ekyc/repository"
 )
@@ -18,7 +17,6 @@ func (i *FaceMatchScoreService) CreateFaceMatchScore(faceScoreData *model.FaceMa
 func (f *FaceMatchScoreService) FetchScoreByImageAndCustomerId(imageId1 string, imageId2 string, customerId string) (*model.FaceMatchScore, error) {
 
 	faceImageScore, err := f.faceMatchScoreRepository.FetchScoreByImageAndCustomerId(imageId1, imageId2, customerId)
-	fmt.Println(faceImageScore, err)
 	return faceImageScore, err
 }
 

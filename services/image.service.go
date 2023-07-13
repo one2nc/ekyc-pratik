@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"go-ekyc/model"
 	"go-ekyc/repository"
 	"math/rand"
@@ -21,7 +20,6 @@ func (c *ImageService) CreateImageUploadAPICall(image *model.ImageUploadAPICall)
 	return err
 }
 func (c *ImageService) FindImageForCustomer(imageIds []string, customerId string) ([]model.Image, error) {
-	fmt.Println(imageIds)
 	images, err := c.imageRepository.FindImagesByIdForCustomer(imageIds, customerId)
 
 	return images, err

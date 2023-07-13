@@ -93,7 +93,7 @@ func (i *ImageControllers) UplaodImage(c *gin.Context) {
 		return
 	}
 	c.AbortWithStatusJSON(http.StatusOK, gin.H{
-		"imageId": imageData.ID,
+		"image_id": imageData.ID,
 	})
 
 	imageStorageCharges := float64(plan.ImageUploadCost) * imageData.FileSizeMB
@@ -128,8 +128,6 @@ func (i *ImageControllers) FaceMatch(c *gin.Context) {
 	}
 	// fetch plan for calculations
 	plan, err := i.PlansService.FetchPlanById(customerModel.PlanID)
-	fmt.Println(plan.ID)
-	fmt.Println(faceMatchRequest)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessage": "Failed to fetch plan"})
 		return
@@ -230,9 +228,8 @@ func (i *ImageControllers) GetOcrData(c *gin.Context) {
 	}
 
 	ocrData, err := i.OCRService.GetOCRData(ocrRequest.ImageId1, customerModel.ID.String())
-fmt.Println(ocrData)
+
 	if err != nil {
-		fmt.Println(err)
 		if gorm.ErrRecordNotFound.Error() != err.Error() {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessage": err.Error()})
 			return

@@ -69,8 +69,8 @@ func (cc *CustomerControllers) RegisterCustomer(c *gin.Context) {
 	}
 
 	c.AbortWithStatusJSON(http.StatusOK, gin.H{
-		"secretKey": secretKey,
-		"accessKey": accessKey,
+		"access_key": accessKey,
+		"secret_key": secretKey,
 	})
 
 }
