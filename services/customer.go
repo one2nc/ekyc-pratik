@@ -2,7 +2,6 @@ package service
 
 import (
 	"errors"
-	"fmt"
 	"go-ekyc/helper"
 	"go-ekyc/model"
 	"go-ekyc/repository"
@@ -23,9 +22,7 @@ func (c *CustomerService) CreateCustomer(customer *model.Customer) error {
 }
 
 func (c *CustomerService) RegisterCustomer(serviceInput service_inputs.RegisterServiceInput) (service_results.RegisterCustomerResult, error) {
-	fmt.Println("fetching plan")
 	plan, err := c.plansRepository.FetchPlansByName(serviceInput.PlanName)
-	fmt.Println("fetched plan")
 
 	if err != nil {
 
@@ -86,6 +83,6 @@ func (c *CustomerService) GetCustomerByCredendials(accessKey string, secretKey s
 func newCustomerService(customerRepository *repository.CustomerRepository, plansRepository *repository.PlansRepository) *CustomerService {
 	return &CustomerService{
 		customerRepository: customerRepository,
-		plansRepository: plansRepository,
+		plansRepository:    plansRepository,
 	}
 }

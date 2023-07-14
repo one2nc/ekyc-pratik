@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"fmt"
 	"go-ekyc/db"
 )
 
@@ -15,7 +14,6 @@ type ApplicationRepository struct {
 
 func NewApplicationRepository() (*ApplicationRepository, error) {
 	db, err := db.InitiateDB()
-	fmt.Println(db)
 	if err != nil {
 		return nil, err
 	}

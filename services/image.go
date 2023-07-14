@@ -68,7 +68,6 @@ func (i *ImageService) UploadImage(input service_inputs.UploadImageInput) (servi
 		return service_results.ImageUploadResult{}, err
 
 	}
-	fmt.Println("minio")
 	bucketName := minioService.MinioConfig.ImageBucket
 	connectionType := "application/" + fileExtension
 	err = minioService.UploadFileToMinio(bucketName, filePath, file, fileSizeBytes, connectionType)
@@ -77,7 +76,6 @@ func (i *ImageService) UploadImage(input service_inputs.UploadImageInput) (servi
 		return service_results.ImageUploadResult{}, err
 
 	}
-	fmt.Println("Uploaded")
 
 	err = i.imageRepository.CreateImage(&imageData)
 

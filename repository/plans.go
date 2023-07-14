@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"fmt"
 	"go-ekyc/model"
 
 	"github.com/google/uuid"
@@ -19,8 +18,7 @@ func (c *PlansRepository) FetchAllPlans() ([]model.Plan, error) {
 	return plans, result.Error
 }
 func (c *PlansRepository) FetchPlansByName(name string) (model.Plan, error) {
-	fmt.Println(name)
-	fmt.Println(c.dbInstance)
+
 	var plan model.Plan
 
 	result := c.dbInstance.Where("plan_name = ?", name).First(&plan)

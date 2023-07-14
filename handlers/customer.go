@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"go-ekyc/handlers/requests"
 	service "go-ekyc/services"
 	service_inputs "go-ekyc/services/service-input"
@@ -29,7 +28,6 @@ func (cc *CustomerControllers) RegisterCustomer(c *gin.Context) {
 		CustomerEmail: signupRequest.Email,
 		CustomerName:  signupRequest.Name,
 	})
-	fmt.Println(result)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"errorMessage": err.Error(),

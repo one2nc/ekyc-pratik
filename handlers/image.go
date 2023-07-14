@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"go-ekyc/handlers/requests"
 	"go-ekyc/helper"
 	"go-ekyc/model"
@@ -13,8 +12,8 @@ import (
 )
 
 type ImageControllers struct {
-	CustomerService       service.CustomerService
-	ImageService          service.ImageService
+	CustomerService service.CustomerService
+	ImageService    service.ImageService
 }
 
 func (i *ImageControllers) UplaodImage(c *gin.Context) {
@@ -22,7 +21,6 @@ func (i *ImageControllers) UplaodImage(c *gin.Context) {
 	customerModel := customer.(model.Customer)
 
 	// fetch plan for calculations
-	fmt.Println("here1")
 	file, fileInfo, err := c.Request.FormFile("image")
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Failed to retrieve image"})
@@ -38,7 +36,6 @@ func (i *ImageControllers) UplaodImage(c *gin.Context) {
 		})
 		return
 	}
-	fmt.Println("here2")
 
 	result, err := i.ImageService.UploadImage(service_inputs.UploadImageInput{
 		Customer:  customerModel,
@@ -46,7 +43,6 @@ func (i *ImageControllers) UplaodImage(c *gin.Context) {
 		FileInfo:  fileInfo,
 		ImageType: imageType,
 	})
-	fmt.Println("here3")
 
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
@@ -54,7 +50,6 @@ func (i *ImageControllers) UplaodImage(c *gin.Context) {
 		})
 		return
 	}
-	fmt.Println("here4")
 
 	c.AbortWithStatusJSON(http.StatusCreated, gin.H{
 		"image_id": result.ImageId.String(),
