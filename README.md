@@ -15,6 +15,39 @@ The purpose of this exercise is for you to get familiar with building HTTP API w
 git clone https://github.com/one2nc/ekyc-pratik.git
 ```
 ----
+
+## How to setup
+- To set up docker containers of postgres and MinIO from docker-compose file, run.
+
+```sh
+make setup
+```
+- To take down docker containers, run.
+```sh
+make setup-down
+```
+----
+
+## MinIO Setup
+- MinIO is an open-source, self-hosted object storage server compatible with Amazon S3 cloud storage service.
+- Images uploaded by customers are stored on MinIO server.
+- MinIO runs in a container using docker-compose file.
+- MinIO admin console can be accessed by opening [localhost:9001](http://localhost:9001) in the browser.
+- Login to the console using `MINIO_ROOT_USER` and `MINIO_ROOT_PASSWORD` provided in docker-compose file.
+- After logging in generate `access and secret key`, which will be used in env variables `MINIO_ACCESS_KEY, MINIO_SECRET_KEY`.
+  - On the left, there is a menu, click on **Access Key**.
+  - Now click on **Create Access Key**  and then click on **Create**.
+  - Copy newly generated access and secret key and set them into the above-mentioned env variables.
+  - <img width="400" alt="Screenshot 2023-07-13 at 1 01 36 PM" src="https://github.com/one2nc/ekyc-pratik/assets/46452464/01217b50-61dd-4400-8b4a-a318e4e6ce3e">
+
+- Create a bucket for images and set the bucket name into `MINIO_IMAGE_BUCKET_NAME` env variable.
+
+  - On the left, there is a menu, click on **Buckets**.
+  - Now click on **Create Bucket**, Entar bucket name in input and click on **Create**.
+  - Set this bucket name in the `MINIO_IMAGE_BUCKET_NAME` env variable.
+  - <img width="400" alt="Screenshot 2023-07-13 at 1 02 35 PM" src="https://github.com/one2nc/ekyc-pratik/assets/46452464/21dfb238-ed05-4693-8b9a-cbbe097df8bb">
+- MinIO API's can be accessed through `localhost:9000`. This has to be set in the `MINIO_IMAGE_ENDPOINT` env variable.
+----
 ## Enviroment Variables
 - Refer `.env.example` file to create your own `.env` file in the root of the project.
 
@@ -33,21 +66,6 @@ git clone https://github.com/one2nc/ekyc-pratik.git
 | `MINIO_IMAGE_BUCKET_NAME` | Name of image bucket
 | `MINIO_IMAGE_ENDPOINT` | MinIO endpoint for api
 ----
-## Setup and Run
-- To set up docker containers of postgres and MinIO from docker-compose file, run.
-
-```sh
-make setup
-```
-- To build and start the server, run.
-```sh
-make run
-```
-- To take down docker containers, run.
-```sh
-make setup-down
-```
-----
 ## Migrations
 - Migration scripts are in the `db/migrations` folder.
 - Migrations are run using [golang-migrate](https://pkg.go.dev/github.com/golang-migrate/migrate/v4) package.
@@ -57,22 +75,13 @@ make setup-down
 migrate create -ext sql -dir <directory_path> -seq <migration_name>
 ```
 ----
-## MinIO Setup
-- MinIO is an open-source, self-hosted object storage server compatible with Amazon S3 cloud storage service.
-- Images uploaded by customers are stored on MinIO server.
-- MinIO runs in a container using docker-compose file.
-- MinIO admin console can be accessed by opening [localhost:9001](http://localhost:9001) in the browser.
-- Login to the console using `MINIO_ROOT_USER` and `MINIO_ROOT_PASSWORD` provided in docker-compose file.
-- After logging in generate `access and secret key`, this will be used in env variables `MINIO_ACCESS_KEY, MINIO_SECRET_KEY`.
-  - On the left, there is a menu, click on **Access Key**
-  - Now click on **Create Access Key**  and then click on **Create**
-  - Copy newly generated access and secret key and set them into above-mentioned env variables
-- Create a bucket for images and set the bucket name into `MINIO_IMAGE_BUCKET_NAME` env variable.
-  - On the left, there is a menu, click on **Buckets**
-  - Now click on **Create Bucket**, Entar bucket name in input and click on **Create**
-  - Set this bucket name in the `MINIO_IMAGE_BUCKET_NAME` env variable
-- MinIO API's can be accessed through `localhost:9000`. This has to be set in the `MINIO_IMAGE_ENDPOINT` env variable.
 
+## How to Run
+
+- To build and start the server, run.
+```sh
+make run
+```
 ----
 ## API Reference
 #### Postman Setup
