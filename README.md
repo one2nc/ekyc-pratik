@@ -1,43 +1,20 @@
 # EKyc
 EKyc is a system that manages user kyc. It provides API based solution for face matching and OCR.<br/> 
 The purpose of this exercise is for you to get familiar with building HTTP API with tests on a real-world use case. This exercise will give you enough idea about building REST APIs in Golang that uses Database, Async workers and Caches, which are the most common components of any web application.
-
+----
 ## Features
 
 - Customer Signup. 
 - Upload Image.
 - Face match score generation.
 - OCR for extracting data from ID cards.
-
+----
 ## How to use
 - Clone this repository.
 ```sh
 git clone https://github.com/one2nc/ekyc-pratik.git
 ```
-- To setup docker containers of postgres and MinIO from docker-compose file, run.
-
-```sh
-make setup
-```
-- To build and start the server, run.
-```sh
-make run
-```
-- To take down docker containers, run.
-```sh
-make setup-down
-```
-
-
-## Migrations
-- Migration scripts are in the `db/migrations` folder.
-- Migrations are run using [golang-migrate](https://pkg.go.dev/github.com/golang-migrate/migrate/v4) package.
-- Migrations run during initialisation of server.
-```sh
-# command to add a migration file
-migrate create -ext sql -dir <directory_path> -seq <migration_name>
-```
-
+----
 ## Enviroment Variables
 - Refer `.env.example` file to create your own `.env` file in the root of the project.
 
@@ -55,19 +32,48 @@ migrate create -ext sql -dir <directory_path> -seq <migration_name>
 | `MINIO_SECRET_KEY` | Secret key for MinIO server
 | `MINIO_IMAGE_BUCKET_NAME` | Name of image bucket
 | `MINIO_IMAGE_ENDPOINT` | MinIO endpoint for api
+----
+## Setup and Run
+- To set up docker containers of postgres and MinIO from docker-compose file, run.
 
+```sh
+make setup
+```
+- To build and start the server, run.
+```sh
+make run
+```
+- To take down docker containers, run.
+```sh
+make setup-down
+```
+----
+## Migrations
+- Migration scripts are in the `db/migrations` folder.
+- Migrations are run using [golang-migrate](https://pkg.go.dev/github.com/golang-migrate/migrate/v4) package.
+- Migrations run during the initialisation of server.
+```sh
+# command to add a migration file
+migrate create -ext sql -dir <directory_path> -seq <migration_name>
+```
+----
 ## MinIO Setup
 - MinIO is an open-source, self-hosted object storage server compatible with Amazon S3 cloud storage service.
 - Images uploaded by customers are stored on MinIO server.
 - MinIO runs in a container using docker-compose file.
 - MinIO admin console can be accessed by opening [localhost:9001](http://localhost:9001) in the browser.
 - Login to the console using `MINIO_ROOT_USER` and `MINIO_ROOT_PASSWORD` provided in docker-compose file.
-
-- After logging in generate `access and secret key`, this will be used in env variables `MINIO_ACCESS_KEY,MINIO_SECRET_KEY`.
+- After logging in generate `access and secret key`, this will be used in env variables `MINIO_ACCESS_KEY, MINIO_SECRET_KEY`.
+  - On the left, there is a menu, click on **Access Key**
+  - Now click on **Create Access Key**  and then click on **Create**
+  - Copy newly generated access and secret key and set them into above-mentioned env variables
 - Create a bucket for images and set the bucket name into `MINIO_IMAGE_BUCKET_NAME` env variable.
-- MinIO API's can be accessed through `localhost:9000`. This has to be set in `MINIO_IMAGE_ENDPOINT` env variable.
+  - On the left, there is a menu, click on **Buckets**
+  - Now click on **Create Bucket**, Entar bucket name in input and click on **Create**
+  - Set this bucket name in the `MINIO_IMAGE_BUCKET_NAME` env variable
+- MinIO API's can be accessed through `localhost:9000`. This has to be set in the `MINIO_IMAGE_ENDPOINT` env variable.
 
-
+----
 ## API Reference
 #### Postman Setup
 - [Postman](https://www.postman.com/) is an API platform for building and using APIs.
@@ -163,7 +169,7 @@ migrate create -ext sql -dir <directory_path> -seq <migration_name>
 | :-------- | :------- | :------------------------- |
 | `image_id` | `string,uuid` | **Required**. |
 - Upload images using upload image api. After uploading you will get image_id for each image in response.
-- Use this image id in ocr api body to get data. Note that provided image should be of type id_card.
+- Use this image id in the ocr api body to get data. Note that provided image should be of type id_card.
 
 #### response
 | Body Parameters | Type     |
