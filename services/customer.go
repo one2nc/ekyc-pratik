@@ -5,39 +5,45 @@ import (
 	"go-ekyc/helper"
 	"go-ekyc/model"
 	"go-ekyc/repository"
-	service_inputs "go-ekyc/services/service-input"
-	service_results "go-ekyc/services/service-results"
 
 	"gorm.io/gorm"
 )
 
+type ICustomerService interface {
+}
+type RegisterServiceInput struct {
+	PlanName      string
+	CustomerEmail string
+	CustomerName  string
+}
+
+type RegisterCustomerResult struct {
+	AccessKey string
+	SecretKey string
+}
+
 type CustomerService struct {
-	customerRepository *repository.CustomerRepository
-	plansRepository    *repository.PlansRepository
+	customerRepository repository.ICustomerRepository
+	plansRepository    repository.IPlansRepository
 }
 
-func (c *CustomerService) CreateCustomer(customer *model.Customer) error {
-	err := c.customerRepository.CreateCustomer(customer)
-	return err
-}
-
-func (c *CustomerService) RegisterCustomer(serviceInput service_inputs.RegisterServiceInput) (service_results.RegisterCustomerResult, error) {
+func (c *CustomerService) RegisterCustomer(serviceInput RegisterServiceInput) (RegisterCustomerResult, error) {
 	plan, err := c.plansRepository.FetchPlansByName(serviceInput.PlanName)
 
 	if err != nil {
 
-		return service_results.RegisterCustomerResult{}, err
+		return RegisterCustomerResult{}, errors.New("error while fetching plan")
 	}
 
 	customer, err := c.customerRepository.GetCustomerByEmail(serviceInput.CustomerEmail)
 	if err != nil && err.Error() != gorm.ErrRecordNotFound.Error() {
 
-		return service_results.RegisterCustomerResult{}, err
+		return RegisterCustomerResult{}, errors.New("error while fetching customer")
 
 	}
 	if customer != (model.Customer{}) {
 
-		return service_results.RegisterCustomerResult{}, errors.New("Email is already registered")
+		return RegisterCustomerResult{}, errors.New("email is already registered")
 	}
 	accessKey := helper.GenerateRandomString(10)
 	secretKey := helper.GenerateRandomString(20)
@@ -53,34 +59,25 @@ func (c *CustomerService) RegisterCustomer(serviceInput service_inputs.RegisterS
 
 	if err != nil {
 
-		return service_results.RegisterCustomerResult{}, err
+		return RegisterCustomerResult{}, err
 	}
 
-	return service_results.RegisterCustomerResult{
+	return RegisterCustomerResult{
 		AccessKey: accessKey,
 		SecretKey: secretKey,
 	}, err
 }
 
-func (c *CustomerService) GetCustomerByEmail(email string) (model.Customer, error) {
-
-	customer, err := c.customerRepository.GetCustomerByEmail(email)
-	if err != nil {
-		return customer, err
-
-	}
-	return customer, nil
-}
 func (c *CustomerService) GetCustomerByCredendials(accessKey string, secretKey string) (model.Customer, error) {
 
 	customer, err := c.customerRepository.GetCustomerByCredendials(accessKey, secretKey)
 	if err != nil {
-		return customer, err
+		return customer, errors.New("error while fetching customers")
 
 	}
 	return customer, nil
 }
-func newCustomerService(customerRepository *repository.CustomerRepository, plansRepository *repository.PlansRepository) *CustomerService {
+func newCustomerService(customerRepository repository.ICustomerRepository, plansRepository repository.IPlansRepository) *CustomerService {
 	return &CustomerService{
 		customerRepository: customerRepository,
 		plansRepository:    plansRepository,

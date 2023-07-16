@@ -6,6 +6,12 @@ import (
 	"gorm.io/gorm"
 )
 
+type IImageRepository interface{
+	CreateImage(image *model.Image) error
+	CreateImageUploadRecord(imageUploadData *model.ImageUploadAPICall) error
+	FindImagesByIdForCustomer(imageIds []string, customerId string) ([]model.Image, error)
+}
+
 type ImageRepository struct {
 	dbInstance *gorm.DB
 }

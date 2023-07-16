@@ -5,9 +5,9 @@ import (
 )
 
 type ApplicationRepository struct {
-	CustomerRepository       *CustomerRepository
-	PlansRepository          *PlansRepository
-	ImageRepository          *ImageRepository
+	CustomerRepository       ICustomerRepository
+	PlansRepository          IPlansRepository
+	ImageRepository          IImageRepository
 	FaceMatchScoreRepository *FaceMatchScoreRepository
 	OCRRepository            *OCRRepository
 }

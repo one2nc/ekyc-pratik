@@ -7,19 +7,44 @@ import (
 	"go-ekyc/helper"
 	"go-ekyc/model"
 	"go-ekyc/repository"
-	service_inputs "go-ekyc/services/service-input"
-	service_results "go-ekyc/services/service-results"
 	"math/rand"
+	"mime/multipart"
 	"path/filepath"
 	"time"
 
+	"github.com/google/uuid"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
+type UploadImageInput struct {
+	Customer  model.Customer
+	File      multipart.File
+	FileInfo  *multipart.FileHeader
+	ImageType string
+}
+type FaceMatchInput struct {
+	Customer model.Customer
+	ImageId1 string
+	ImageId2 string
+}
+type OCRInput struct {
+	Customer model.Customer
+	ImageId  string
+}
+type ImageUploadResult struct {
+	ImageId uuid.UUID
+}
+type FaceMatchResult struct {
+	Score int
+}
+type OCRResult struct {
+	Data interface{}
+}
+
 type ImageService struct {
-	imageRepository          *repository.ImageRepository
-	plansRepository          *repository.PlansRepository
+	imageRepository          repository.IImageRepository
+	plansRepository          repository.IPlansRepository
 	faceMatchScoreRepository *repository.FaceMatchScoreRepository
 	ocrRepository            *repository.OCRRepository
 	ocrService               *OCRService
@@ -29,12 +54,12 @@ func (i *ImageService) CreateImage(image *model.Image) error {
 	err := i.imageRepository.CreateImage(image)
 	return err
 }
-func (i *ImageService) UploadImage(input service_inputs.UploadImageInput) (service_results.ImageUploadResult, error) {
+func (i *ImageService) UploadImage(input UploadImageInput) (ImageUploadResult, error) {
 
 	plan, err := i.plansRepository.FetchPlanById(input.Customer.PlanID)
 
 	if err != nil {
-		return service_results.ImageUploadResult{}, err
+		return ImageUploadResult{}, err
 	}
 
 	file, fileInfo := input.File, input.FileInfo
@@ -45,7 +70,7 @@ func (i *ImageService) UploadImage(input service_inputs.UploadImageInput) (servi
 
 	if imageType == "" || !helper.IsImageTypeValid(imageType) {
 
-		return service_results.ImageUploadResult{}, errors.New("Invalid image type. valid type are face or id_card")
+		return ImageUploadResult{}, errors.New("Invalid image type. valid type are face or id_card")
 
 	}
 
@@ -65,7 +90,7 @@ func (i *ImageService) UploadImage(input service_inputs.UploadImageInput) (servi
 
 	if err != nil {
 
-		return service_results.ImageUploadResult{}, err
+		return ImageUploadResult{}, err
 
 	}
 	bucketName := minioService.MinioConfig.ImageBucket
@@ -73,7 +98,7 @@ func (i *ImageService) UploadImage(input service_inputs.UploadImageInput) (servi
 	err = minioService.UploadFileToMinio(bucketName, filePath, file, fileSizeBytes, connectionType)
 	if err != nil {
 
-		return service_results.ImageUploadResult{}, err
+		return ImageUploadResult{}, err
 
 	}
 
@@ -81,7 +106,7 @@ func (i *ImageService) UploadImage(input service_inputs.UploadImageInput) (servi
 
 	if err != nil {
 
-		return service_results.ImageUploadResult{}, err
+		return ImageUploadResult{}, err
 
 	}
 
@@ -95,36 +120,36 @@ func (i *ImageService) UploadImage(input service_inputs.UploadImageInput) (servi
 	err = i.imageRepository.CreateImageUploadRecord(&imageUploadAPICall)
 
 	if err != nil {
-		return service_results.ImageUploadResult{}, err
+		return ImageUploadResult{}, err
 	}
 
-	return service_results.ImageUploadResult{ImageId: imageData.ID}, nil
+	return ImageUploadResult{ImageId: imageData.ID}, nil
 }
 
-func (i *ImageService) FaceMatch(input service_inputs.FaceMatchInput) (service_results.FaceMatchResult, error) {
+func (i *ImageService) FaceMatch(input FaceMatchInput) (FaceMatchResult, error) {
 	plan, err := i.plansRepository.FetchPlanById(input.Customer.PlanID)
 	if err != nil {
-		return service_results.FaceMatchResult{}, errors.New("Failed to fetch plan")
+		return FaceMatchResult{}, errors.New("Failed to fetch plan")
 	}
 
 	images, err := i.imageRepository.FindImagesByIdForCustomer([]string{input.ImageId1, input.ImageId2}, input.Customer.ID.String())
 
 	if err != nil {
-		return service_results.FaceMatchResult{}, err
+		return FaceMatchResult{}, err
 	}
 	if len(images) != 2 {
-		return service_results.FaceMatchResult{}, err
+		return FaceMatchResult{}, errors.New("invalid image ids")
 	}
 
 	if !helper.IsImagesComparable(images[0], images[1]) {
-		return service_results.FaceMatchResult{}, errors.New("Invalid image type")
+		return FaceMatchResult{}, errors.New("Invalid image type")
 	}
 
 	faceMatchScoreRecord, err := i.faceMatchScoreRepository.FetchScoreByImageAndCustomerId(input.ImageId1, input.ImageId2, input.Customer.ID.String())
 
 	if err != nil {
 		if gorm.ErrRecordNotFound.Error() != err.Error() {
-			return service_results.FaceMatchResult{}, err
+			return FaceMatchResult{}, err
 		}
 
 	}
@@ -141,7 +166,7 @@ func (i *ImageService) FaceMatch(input service_inputs.FaceMatchInput) (service_r
 
 		err = i.faceMatchScoreRepository.CreateFaceMatchScore(faceMatchScoreRecord)
 		if err != nil {
-			return service_results.FaceMatchResult{}, err
+			return FaceMatchResult{}, err
 		}
 	}
 	faceMatchApiData := model.FaceMatchAPICall{
@@ -151,37 +176,37 @@ func (i *ImageService) FaceMatch(input service_inputs.FaceMatchInput) (service_r
 	}
 	err = i.faceMatchScoreRepository.CreateFaceMatchScoreAPIRecord(&faceMatchApiData)
 	if err != nil {
-		return service_results.FaceMatchResult{}, err
+		return FaceMatchResult{}, err
 	}
-	return service_results.FaceMatchResult{Score: faceMatchScoreRecord.Score}, err
+	return FaceMatchResult{Score: faceMatchScoreRecord.Score}, err
 }
 
-func (i *ImageService) GetOCRData(input service_inputs.OCRInput) (service_results.OCRResult, error) {
+func (i *ImageService) GetOCRData(input OCRInput) (OCRResult, error) {
 
 	plan, err := i.plansRepository.FetchPlanById(input.Customer.PlanID)
 
 	if err != nil {
-		return service_results.OCRResult{}, errors.New("Failed to fetch plan")
+		return OCRResult{}, errors.New("Failed to fetch plan")
 	}
 
-	images, err := i.FindImageForCustomer([]string{input.ImageId}, input.Customer.ID.String())
+	images, err := i.imageRepository.FindImagesByIdForCustomer([]string{input.ImageId}, input.Customer.ID.String())
 
 	if err != nil {
-		return service_results.OCRResult{}, err
+		return OCRResult{}, err
 	}
 	if len(images) != 1 {
-		return service_results.OCRResult{}, errors.New("Invalid image id")
+		return OCRResult{}, errors.New("Invalid image id")
 	}
 
 	if images[0].ImageType != "id_card" {
-		return service_results.OCRResult{}, errors.New("OCR can be done only on image of type ID")
+		return OCRResult{}, errors.New("OCR can be done only on image of type ID")
 	}
 
 	ocrData, err := i.ocrRepository.GetOCRDataForCustomerByImageId(input.ImageId, input.Customer.ID.String())
 
 	if err != nil {
 		if gorm.ErrRecordNotFound.Error() != err.Error() {
-			return service_results.OCRResult{}, err
+			return OCRResult{}, err
 		}
 
 	}
@@ -189,12 +214,12 @@ func (i *ImageService) GetOCRData(input service_inputs.OCRInput) (service_result
 
 		data, err := i.ocrService.OCRExtractData()
 		if err != nil {
-			return service_results.OCRResult{}, errors.New("Error while extracting data")
+			return OCRResult{}, errors.New("Error while extracting data")
 
 		}
 		jsonData, err := json.Marshal(data)
 		if err != nil {
-			return service_results.OCRResult{}, errors.New("Error while extracting data")
+			return OCRResult{}, errors.New("Error while extracting data")
 		}
 		ocrData = &model.OCRData{
 			CustomerID: input.Customer.ID,
@@ -205,7 +230,7 @@ func (i *ImageService) GetOCRData(input service_inputs.OCRInput) (service_result
 		err = i.ocrRepository.CreateOCRData(ocrData)
 
 		if err != nil {
-			return service_results.OCRResult{}, err
+			return OCRResult{}, err
 
 		}
 	}
@@ -219,10 +244,10 @@ func (i *ImageService) GetOCRData(input service_inputs.OCRInput) (service_result
 
 	err = i.ocrRepository.CreateOcrAPICall(ocrAPICallData)
 	if err != nil {
-		return service_results.OCRResult{}, err
+		return OCRResult{}, err
 
 	}
-	return service_results.OCRResult{
+	return OCRResult{
 		Data: ocrData.OCRData,
 	}, nil
 }
@@ -247,7 +272,7 @@ func (i *ImageService) GenerateFacteMatchScore() int {
 
 }
 
-func newImageService(imageRepository *repository.ImageRepository, plansRepository *repository.PlansRepository, faceMatchScoreRepository *repository.FaceMatchScoreRepository, ocrRepository *repository.OCRRepository, ocrService *OCRService) *ImageService {
+func newImageService(imageRepository repository.IImageRepository, plansRepository repository.IPlansRepository, faceMatchScoreRepository *repository.FaceMatchScoreRepository, ocrRepository *repository.OCRRepository, ocrService *OCRService) *ImageService {
 	return &ImageService{
 		imageRepository:          imageRepository,
 		plansRepository:          plansRepository,

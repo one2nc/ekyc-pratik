@@ -5,7 +5,7 @@ import (
 	"go-ekyc/helper"
 	"go-ekyc/model"
 	service "go-ekyc/services"
-	service_inputs "go-ekyc/services/service-input"
+
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -37,7 +37,7 @@ func (i *ImageControllers) UplaodImage(c *gin.Context) {
 		return
 	}
 
-	result, err := i.ImageService.UploadImage(service_inputs.UploadImageInput{
+	result, err := i.ImageService.UploadImage(service.UploadImageInput{
 		Customer:  customerModel,
 		File:      file,
 		FileInfo:  fileInfo,
@@ -70,7 +70,7 @@ func (i *ImageControllers) FaceMatch(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessage": "Cannot use same ids"})
 		return
 	}
-	results, err := i.ImageService.FaceMatch(service_inputs.FaceMatchInput{
+	results, err := i.ImageService.FaceMatch(service.FaceMatchInput{
 		Customer: customerModel,
 		ImageId1: faceMatchRequest.ImageId1,
 		ImageId2: faceMatchRequest.ImageId2,
@@ -95,10 +95,10 @@ func (i *ImageControllers) GetOcrData(c *gin.Context) {
 	}
 
 	// fetch plan for calculations
-	result, err := i.ImageService.GetOCRData(service_inputs.OCRInput{Customer: customerModel, ImageId: ocrRequest.ImageId1})
+	result, err := i.ImageService.GetOCRData(service.OCRInput{Customer: customerModel, ImageId: ocrRequest.ImageId1})
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"errorMessage": err,
+			"errorMessage": err.Error(),
 		})
 		return
 	}

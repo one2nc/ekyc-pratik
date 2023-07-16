@@ -3,7 +3,6 @@ package handlers
 import (
 	"go-ekyc/handlers/requests"
 	service "go-ekyc/services"
-	service_inputs "go-ekyc/services/service-input"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -23,7 +22,7 @@ func (cc *CustomerControllers) RegisterCustomer(c *gin.Context) {
 		return
 	}
 
-	result, err := cc.CustomerService.RegisterCustomer(service_inputs.RegisterServiceInput{
+	result, err := cc.CustomerService.RegisterCustomer(service.RegisterServiceInput{
 		PlanName:      signupRequest.Plan,
 		CustomerEmail: signupRequest.Email,
 		CustomerName:  signupRequest.Name,
