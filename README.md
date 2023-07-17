@@ -192,3 +192,34 @@ make run
 | `data.address` | `string` |
 | `data.pincode` | `string` |
 | `data.idNumber` | `string` |
+---
+#### Reports 
+```http
+  POST /api/v1/reports/
+```
+| Headers | Description     
+| :-------- | :------- |
+| `Access-Key` |  **Required**. |
+| `Secret-Key` |  **Required**. |
+- These headers are set automatically by env variables and scripts.
+
+
+| Body Parameters | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `start_date` | `string,date(yyyy-mm-dd)` | **Required**. |
+| `end_date` | `string,date(yyyy-mm-dd)` | **Required**. |
+- Customer can get an aggregated report for dates between start_date and end_date
+
+#### response
+| Body Parameters | Type     |
+| :-------- | :------- | 
+| `start_date_of_report` | `string` |  
+| `end_date_of_report` | `string` |
+| `total_base_charge` | `float` |
+| `total_face_match_count` | `int` |
+| `total_face_match_cost` | `float` |
+| `total_ocr_count` | `int` |
+| `total_ocr_cost` | `float` |
+| `total_image_storage_size_mb` | `float` |
+| `total_image_storage_cost` | `float` |
+| `total_api_call_charges` | `int` |

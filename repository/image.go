@@ -2,7 +2,6 @@ package repository
 
 import (
 	"go-ekyc/model"
-	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -58,13 +57,13 @@ func (i *ImageRepository) GetImageUploadAPIReport(startDate time.Time, endDate t
 		Group("image_upload_api_calls.customer_id").
 		Rows()
 
+		results := map[uuid.UUID]ImageUploadAPIReport{}
 	if err != nil {
-		log.Fatal(err)
+		return results,err
 	}
 	defer rows.Close()
 
 	// Iterate over the rows and retrieve the results
-	results := map[uuid.UUID]ImageUploadAPIReport{}
 	for rows.Next() {
 		result := ImageUploadAPIReport{}
 		err := i.dbInstance.ScanRows(rows, &result)
@@ -83,14 +82,14 @@ func (i *ImageRepository) GetOcrUploadAPIReport(startDate time.Time, endDate tim
 		Where("image_upload_api_calls.created_at BETWEEN ? AND ?", startDate, endDate).
 		Group("image_upload_api_calls.customer_id").
 		Rows()
-
+		
+		results := map[uuid.UUID]ImageUploadAPIReport{}
 	if err != nil {
-		log.Fatal(err)
+	return results,err
 	}
 	defer rows.Close()
 
 	// Iterate over the rows and retrieve the results
-	results := map[uuid.UUID]ImageUploadAPIReport{}
 	for rows.Next() {
 		result := ImageUploadAPIReport{}
 		err := i.dbInstance.ScanRows(rows, &result)

@@ -2,7 +2,6 @@ package repository
 
 import (
 	"go-ekyc/model"
-	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -57,13 +56,13 @@ func (i *OCRRepository) GetOCRAPIReport(startDate time.Time, endDate time.Time) 
 		Group("ocr_api_calls.customer_id").
 		Rows()
 
+	results := map[uuid.UUID]OCRAPIReport{}
 	if err != nil {
-		log.Fatal(err)
+		return results, err
 	}
 	defer rows.Close()
 
 	// Iterate over the rows and retrieve the results
-	results := map[uuid.UUID]OCRAPIReport{}
 	for rows.Next() {
 		result := OCRAPIReport{}
 		err := i.dbInstance.ScanRows(rows, &result)

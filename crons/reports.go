@@ -13,7 +13,7 @@ func scheduleReportCron(c *cron.Cron, appService *service.ApplicationService) {
 
 	c.AddFunc("0 0 * * *", func() {
 
-		lockKey := "daily_reports_cron_job_key_1"
+		lockKey := "daily_reports_cron_job_key"
 		lockValue := true
 		expiration := time.Duration.Minutes(1)
 

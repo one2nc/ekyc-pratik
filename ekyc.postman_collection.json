@@ -38,7 +38,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\":\"pratik\",\n    \"plan\":\"basic\",\n    \"email\":\"p8@g.com\"\n}",
+							"raw": "{\n    \"name\":\"pratik\",\n    \"plan\":\"enterprise\",\n    \"email\":\"pratik7@gmail.com\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -95,7 +95,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"image_id_1\":\"c837da4e-52f4-4b9f-90fd-1410430584b6\",\n    \"image_id_2\":\"c87ee9b4-22f6-4ed6-ae1f-86eeab349d21\"\n}",
+							"raw": "{\n    \"image_id_1\":\"d41773c4-5ba6-49c1-86fc-ae5d8c4ed0f1\",\n    \"image_id_2\":\"7cf347b4-7734-4e02-aee5-17e0b6df5a4a\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -214,7 +214,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"image_id\":\"366b120f-f4c2-4fd2-bbe2-339807a653e5\"\n}",
+							"raw": "{\n    \"image_id\":\"b3977e2d-ca2f-4712-a219-ef70138796a5\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -231,6 +231,72 @@
 								"v1",
 								"image",
 								"ocr"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "report",
+			"item": [
+				{
+					"name": "report",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"baseURL\",\"http://127.0.0.1:3000\");",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Access-Key",
+								"value": "{{access_key}}",
+								"type": "default"
+							},
+							{
+								"key": "Secret-Key",
+								"value": "{{secret_key}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"start_date\" :\"2023-07-14\",\n    \"end_date\":\"2023-07-18\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/api/v1/report/",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"report",
+								""
 							]
 						}
 					},

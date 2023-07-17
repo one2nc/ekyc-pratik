@@ -7,6 +7,7 @@ import (
 	"go-ekyc/repository"
 	"time"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -151,4 +152,11 @@ func (c *CustomerService) CreateCustomerReports(startDate time.Time, endDate tim
 
 	}
 	return err
+}
+
+func (c *CustomerService) GetAggregateReportForCustomer(startDate time.Time, endDate time.Time, customerId uuid.UUID) (repository.CustomerAggregatedReport, error) {
+
+	report, err := c.dailyReportRepository.GetCustomersAggregatedReportByDates(startDate, endDate, customerId.String())
+	return report, err
+
 }

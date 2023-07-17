@@ -2,7 +2,6 @@ package repository
 
 import (
 	"go-ekyc/model"
-	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -54,13 +53,13 @@ func (i *FaceMatchScoreRepository) GetFaceMatchAPIReport(startDate time.Time, en
 		Group("face_match_api_calls.customer_id").
 		Rows()
 
+		results := map[uuid.UUID]FaceMatchAPIReport{}
 	if err != nil {
-		log.Fatal(err)
+		return results,err
 	}
 	defer rows.Close()
 
 	// Iterate over the rows and retrieve the results
-	results := map[uuid.UUID]FaceMatchAPIReport{}
 	for rows.Next() {
 		result := FaceMatchAPIReport{}
 		err := i.dbInstance.ScanRows(rows, &result)
