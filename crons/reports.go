@@ -11,7 +11,7 @@ import (
 
 func scheduleReportCron(c *cron.Cron, appService *service.ApplicationService) {
 
-	c.AddFunc("@every 5s", func() {
+	c.AddFunc("0 0 * * *", func() {
 
 		lockKey := "daily_reports_cron_job_key_1"
 		lockValue := true
