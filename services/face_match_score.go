@@ -8,6 +8,11 @@ import (
 type FaceMatchScoreService struct {
 	faceMatchScoreRepository *repository.FaceMatchScoreRepository
 }
+func newFaceMatchScoreService(faceMatchScoreRepository *repository.FaceMatchScoreRepository) *FaceMatchScoreService {
+	return &FaceMatchScoreService{
+		faceMatchScoreRepository: faceMatchScoreRepository,
+	}
+}
 
 func (i *FaceMatchScoreService) CreateFaceMatchScore(faceScoreData *model.FaceMatchScore) error {
 	err := i.faceMatchScoreRepository.CreateFaceMatchScore(faceScoreData)
@@ -27,8 +32,4 @@ func (f *FaceMatchScoreService) CreateFaceMatchScoreAPIRecord(faceMatchApiData *
 	return err
 }
 
-func newFaceMatchScoreService(faceMatchScoreRepository *repository.FaceMatchScoreRepository) *FaceMatchScoreService {
-	return &FaceMatchScoreService{
-		faceMatchScoreRepository: faceMatchScoreRepository,
-	}
-}
+

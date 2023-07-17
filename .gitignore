@@ -3,3 +3,4 @@
 data
 minio-data
 go-ekyc
+redis-data

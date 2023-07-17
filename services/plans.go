@@ -10,7 +10,11 @@ import (
 type PlansService struct {
 	plansRepository repository.IPlansRepository
 }
-
+func newPlansService(plansRepository repository.IPlansRepository) *PlansService {
+	return &PlansService{
+		plansRepository: plansRepository,
+	}
+}
 
 func (p *PlansService) FetchPlansByName(name string) (model.Plan,error) {
 	plan,err := p.plansRepository.FetchPlansByName(name)
@@ -24,8 +28,4 @@ func (p *PlansService) FetchPlanById(planId uuid.UUID) (model.Plan,error) {
 }
 
 
-func newPlansService(plansRepository repository.IPlansRepository) *PlansService {
-	return &PlansService{
-		plansRepository: plansRepository,
-	}
-}
+

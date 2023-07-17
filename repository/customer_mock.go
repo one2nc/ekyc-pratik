@@ -10,6 +10,13 @@ type CustomerMockRepository struct {
 	customerList []model.Customer
 }
 
+func newCustomerMockRepository(customer []model.Customer) ICustomerRepository {
+
+	return &CustomerMockRepository{
+		customerList: customer,
+	}
+}
+
 func (c CustomerMockRepository) CreateCustomer(customer *model.Customer) error {
 	c.customerList = append(c.customerList, *customer)
 
@@ -34,9 +41,8 @@ func (c CustomerMockRepository) GetCustomerByCredendials(accessKey string, secre
 	}
 	return model.Customer{}, gorm.ErrRecordNotFound
 }
-func newCustomerMockRepository(customer []model.Customer) ICustomerRepository {
+func (c CustomerMockRepository) GetCustomersWithPlans() ([]model.Customer, error) {
 
-	return &CustomerMockRepository{
-		customerList: customer,
-	}
+	return []model.Customer{}, gorm.ErrRecordNotFound
 }
+

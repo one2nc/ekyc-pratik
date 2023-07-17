@@ -10,6 +10,7 @@ type ICustomerRepository interface {
 	CreateCustomer(customer *model.Customer) error
 	GetCustomerByEmail(email string) (model.Customer, error)
 	GetCustomerByCredendials(accessKey string, secretKey string) (model.Customer, error)
+	GetCustomersWithPlans() ([]model.Customer, error)
 }
 
 type CustomerRepository struct {
@@ -31,6 +32,16 @@ func (c *CustomerRepository) GetCustomerByCredendials(accessKey string, secretKe
 	customer := model.Customer{}
 	result := c.dbInstance.Where("access_key = ? and secret_key = ? ", accessKey, secretKey).First(&customer)
 	return customer, result.Error
+}
+
+func (c *CustomerRepository) GetCustomersWithPlans() ([]model.Customer, error) {
+	var customers []model.Customer
+	result := c.dbInstance.Preload("Plan").Find(&customers)
+
+	if result.Error != nil {
+		return customers, result.Error
+	}
+	return customers, result.Error
 }
 func newCustomerRepository(db *gorm.DB) ICustomerRepository {
 	return &CustomerRepository{

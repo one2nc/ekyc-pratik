@@ -13,6 +13,14 @@ type CustomerControllers struct {
 	PlansService    service.PlansService
 }
 
+func newCustomerController(customerService *service.CustomerService, plansService *service.PlansService) *CustomerControllers {
+	return &CustomerControllers{
+		CustomerService: *customerService,
+		PlansService:    *plansService,
+	}
+}
+
+
 func (cc *CustomerControllers) RegisterCustomer(c *gin.Context) {
 
 	var signupRequest requests.SignupRequest
@@ -41,9 +49,3 @@ func (cc *CustomerControllers) RegisterCustomer(c *gin.Context) {
 
 }
 
-func newCustomerController(customerService *service.CustomerService, plansService *service.PlansService) *CustomerControllers {
-	return &CustomerControllers{
-		CustomerService: *customerService,
-		PlansService:    *plansService,
-	}
-}

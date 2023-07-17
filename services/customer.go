@@ -5,6 +5,7 @@ import (
 	"go-ekyc/helper"
 	"go-ekyc/model"
 	"go-ekyc/repository"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -23,8 +24,25 @@ type RegisterCustomerResult struct {
 }
 
 type CustomerService struct {
-	customerRepository repository.ICustomerRepository
-	plansRepository    repository.IPlansRepository
+	customerRepository    repository.ICustomerRepository
+	plansRepository       repository.IPlansRepository
+	imageRepository       repository.IImageRepository
+	faceMatchRepository   repository.FaceMatchScoreRepository
+	ocrRepository         repository.OCRRepository
+	dailyReportRepository repository.IDailyReportsRepository
+	RedisRepository       repository.RedisRepository
+}
+
+func newCustomerService(customerRepository repository.ICustomerRepository, plansRepository repository.IPlansRepository, imageRepository repository.IImageRepository, faceMatchRepository repository.FaceMatchScoreRepository, ocrRepository repository.OCRRepository, dailyReportRepository repository.IDailyReportsRepository, redisRepository repository.RedisRepository) *CustomerService {
+	return &CustomerService{
+		customerRepository:    customerRepository,
+		plansRepository:       plansRepository,
+		imageRepository:       imageRepository,
+		faceMatchRepository:   faceMatchRepository,
+		ocrRepository:         ocrRepository,
+		dailyReportRepository: dailyReportRepository,
+		RedisRepository:       redisRepository,
+	}
 }
 
 func (c *CustomerService) RegisterCustomer(serviceInput RegisterServiceInput) (RegisterCustomerResult, error) {
@@ -49,7 +67,7 @@ func (c *CustomerService) RegisterCustomer(serviceInput RegisterServiceInput) (R
 	secretKey := helper.GenerateRandomString(20)
 
 	customerData := model.Customer{
-		Name:      serviceInput.PlanName,
+		Name:      serviceInput.CustomerName,
 		Email:     serviceInput.CustomerEmail,
 		PlanID:    plan.ID,
 		AccessKey: helper.GetMD5Hash(accessKey),
@@ -77,9 +95,60 @@ func (c *CustomerService) GetCustomerByCredendials(accessKey string, secretKey s
 	}
 	return customer, nil
 }
-func newCustomerService(customerRepository repository.ICustomerRepository, plansRepository repository.IPlansRepository) *CustomerService {
-	return &CustomerService{
-		customerRepository: customerRepository,
-		plansRepository:    plansRepository,
+
+func (c *CustomerService) CreateCustomerReports(startDate time.Time, endDate time.Time) error {
+	customers, err := c.customerRepository.GetCustomersWithPlans()
+	if err != nil {
+		return err
 	}
+	// get image upload charges
+	imageUploadCharge, err := c.imageRepository.GetImageUploadAPIReport(startDate, endDate)
+	if err != nil {
+		return err
+
+	}
+	// get face-macth charges
+	faceMatchApiCharges, err := c.faceMatchRepository.GetFaceMatchAPIReport(startDate, endDate)
+	if err != nil {
+		return err
+
+	}
+	// get ocr charges
+	ocrApiCharges, err := c.ocrRepository.GetOCRAPIReport(startDate, endDate)
+	if err != nil {
+		return err
+
+	}
+	// create data for bulk upload
+	reports := []model.DailyReport{}
+	for _, customer := range customers {
+		baseCharge := customer.Plan.DailyBaseCost
+
+		faceMatchCost := faceMatchApiCharges[customer.ID].TotalApiCharge
+		faceMatchCount := faceMatchApiCharges[customer.ID].TotalApiCount
+
+		ocrCost := ocrApiCharges[customer.ID].TotalApiCharge
+		ocrCount := ocrApiCharges[customer.ID].TotalApiCount
+
+		imageUploadCost := imageUploadCharge[customer.ID].TotalUploadCharges
+		imageUploadSize := imageUploadCharge[customer.ID].TotalImageSize
+		reports = append(reports, model.DailyReport{
+			CustomerID:              customer.ID,
+			DateOfReport:            startDate,
+			DailyBaseCharges:        baseCharge,
+			NoOfFaceMatch:           faceMatchCount,
+			TotalCostOfFaceMatch:    faceMatchCost,
+			TotalImageStorageSizeMb: imageUploadSize,
+			TotalImageStorageCost:   imageUploadCost,
+			NumberOfOCR:             ocrCount,
+			TotalCostOfOCR:          ocrCost,
+			TotalAPICallCharges:     baseCharge + ocrCost + faceMatchCost + imageUploadCost,
+		})
+	}
+	err = c.dailyReportRepository.BulkCreateDailyReports(reports)
+	if err != nil {
+		return err
+
+	}
+	return err
 }

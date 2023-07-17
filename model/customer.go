@@ -12,6 +12,7 @@ type Customer struct {
 	Name      string    `gorm:"not null"`
 	Email     string    `gorm:"not null;unique"`
 	PlanID    uuid.UUID `gorm:"not null"`
+	Plan      Plan      `gorm:"foreignKey:PlanID"`
 	AccessKey string    `gorm:"not null"`
 	SecretKey string    `gorm:"not null"`
 	CreatedAt time.Time `gorm:"not null"`

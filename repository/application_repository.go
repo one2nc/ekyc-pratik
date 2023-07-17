@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"go-ekyc/config"
 	"go-ekyc/db"
 )
 
@@ -10,6 +11,8 @@ type ApplicationRepository struct {
 	ImageRepository          IImageRepository
 	FaceMatchScoreRepository *FaceMatchScoreRepository
 	OCRRepository            *OCRRepository
+	DailyReportsRepository   IDailyReportsRepository
+	RedisRepository          RedisRepository
 }
 
 func NewApplicationRepository() (*ApplicationRepository, error) {
@@ -18,11 +21,19 @@ func NewApplicationRepository() (*ApplicationRepository, error) {
 		return nil, err
 	}
 
+	redisConfig := config.NewRedisConfig()
+	redisRepository, err := newRedisRepository(redisConfig)
+
+	if err != nil {
+		return nil, err
+	}
 	return &ApplicationRepository{
 		CustomerRepository:       newCustomerRepository(db),
 		PlansRepository:          newPlansRepository(db),
 		ImageRepository:          newImageRepository(db),
 		FaceMatchScoreRepository: newFaceMatchScoreRepository(db),
 		OCRRepository:            newOCRRepositoty(db),
+		DailyReportsRepository:   newDailyReportsRepository(db),
+		RedisRepository:          *redisRepository,
 	}, nil
 }

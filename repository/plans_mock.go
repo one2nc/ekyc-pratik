@@ -10,6 +10,11 @@ import (
 type PlansMockRepository struct {
 	plans []model.Plan
 }
+func newPlansMockRepository(plans []model.Plan) IPlansRepository {
+	return &PlansMockRepository{
+		plans: plans,
+	}
+}
 
 func (c *PlansMockRepository) FetchPlansByName(name string) (model.Plan, error) {
 
@@ -32,8 +37,4 @@ func (c *PlansMockRepository) FetchPlanById(id uuid.UUID) (model.Plan, error) {
 	return model.Plan{}, errors.New("Plan not found")
 }
 
-func newPlansMockRepository(plans []model.Plan) IPlansRepository {
-	return &PlansMockRepository{
-		plans: plans,
-	}
-}
+

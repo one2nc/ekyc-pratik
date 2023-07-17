@@ -1,6 +1,7 @@
 package main
 
 import (
+	"go-ekyc/crons"
 	"go-ekyc/handlers"
 	"go-ekyc/repository"
 	"go-ekyc/server"
@@ -24,7 +25,7 @@ func main() {
 	}
 
 	appService := service.NewApplicationService(applicationRepository)
-
+	crons.RegisterCron(appService)
 	appController := handlers.NewApplicationController(appService)
 
 	serverConfig := server.ServerConfig{

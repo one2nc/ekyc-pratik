@@ -11,13 +11,6 @@ type MinioService struct {
 	minioClient *minio.Client
 	MinioConfig config.MinioConfig
 }
-
-func (m *MinioService) UploadFileToMinio(bucketName string, objName string, file io.Reader, objSize int64, contentType string) error {
-
-	_, err := m.minioClient.PutObject(bucketName, objName, file, objSize, minio.PutObjectOptions{ContentType: contentType})
-	return err
-}
-
 func NewMinioService() (*MinioService, error) {
 
 	minioConfig := config.NewMinioConfig()
@@ -31,3 +24,10 @@ func NewMinioService() (*MinioService, error) {
 		MinioConfig: minioConfig,
 	}, nil
 }
+func (m *MinioService) UploadFileToMinio(bucketName string, objName string, file io.Reader, objSize int64, contentType string) error {
+
+	_, err := m.minioClient.PutObject(bucketName, objName, file, objSize, minio.PutObjectOptions{ContentType: contentType})
+	return err
+}
+
+

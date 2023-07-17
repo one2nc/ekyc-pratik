@@ -61,7 +61,7 @@ func TestCustomerService_RegisterCustomer(t *testing.T) {
 	}
 
 	appMockRepository := repository.NewApplicationMockRepository(MockedCustomers, MockedPlans)
-	customerService := newCustomerService(appMockRepository.CustomerRepository, appMockRepository.PlansRepository)
+	customerService := newCustomerService(appMockRepository.CustomerRepository, appMockRepository.PlansRepository, appMockRepository.ImageRepository, appMockRepository.FaceMatchScoreRepository, appMockRepository.OCRRepository, appMockRepository.DailyReportsRepository,appMockRepository.RedisRepository)
 
 	testCases := []struct {
 		serviceInput    RegisterServiceInput
@@ -84,7 +84,7 @@ func TestCustomerService_RegisterCustomer(t *testing.T) {
 		{
 			serviceInput: RegisterServiceInput{
 				CustomerEmail: MockedCustomers[0].Email,
-				PlanName:     "invalid plan name",
+				PlanName:      "invalid plan name",
 			},
 			decription:      "Plan not found",
 			isErrorExpected: true,
@@ -168,14 +168,14 @@ func TestCustomerService_GetCustomerByCredendials(t *testing.T) {
 	}
 
 	appMockRepository := repository.NewApplicationMockRepository(MockedCustomers, MockedPlans)
-	customerService := newCustomerService(appMockRepository.CustomerRepository, appMockRepository.PlansRepository)
+	customerService := newCustomerService(appMockRepository.CustomerRepository, appMockRepository.PlansRepository, appMockRepository.ImageRepository, appMockRepository.FaceMatchScoreRepository, appMockRepository.OCRRepository, appMockRepository.DailyReportsRepository,appMockRepository.RedisRepository)
 
 	testCases := []struct {
 		accessKey       string
 		secretKey       string
 		expectedOutput  model.Customer
 		isErrorExpected bool
-		expectedError error
+		expectedError   error
 		failedMessage   string
 		decription      string
 	}{
@@ -195,12 +195,12 @@ func TestCustomerService_GetCustomerByCredendials(t *testing.T) {
 			failedMessage:   "Failed for Customer not found test case",
 			accessKey:       "wrong-key",
 			secretKey:       "wrong-key",
-			expectedError: errors.New("error while fetching customers"),
+			expectedError:   errors.New("error while fetching customers"),
 		},
 	}
 
 	for _, testCase := range testCases {
-		result, err := customerService.GetCustomerByCredendials(testCase.accessKey,testCase.secretKey)
+		result, err := customerService.GetCustomerByCredendials(testCase.accessKey, testCase.secretKey)
 
 		if testCase.isErrorExpected {
 
