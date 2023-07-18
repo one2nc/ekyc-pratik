@@ -7,6 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterRoutes(router *gin.Engine, appController *handlers.ApplicationController) {
-	api.RegisterAPIRoutes(router, appController)
+func RegisterRoutes(router *gin.Engine, appHandler *handlers.ApplicationHandler) {
+	api.RegisterAPIRoutes(router, appHandler)
 }

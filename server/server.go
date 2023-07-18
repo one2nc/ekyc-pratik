@@ -12,8 +12,8 @@ type ServerConfig struct {
 	Address string
 }
 
-func InitiateServer(serverConfig ServerConfig, appController *handlers.ApplicationController) {
+func InitiateServer(serverConfig ServerConfig, appHandler *handlers.ApplicationHandler) {
 	r := gin.Default()
-	route.RegisterRoutes(r, appController)
+	route.RegisterRoutes(r, appHandler)
 	r.Run(serverConfig.Address + ":" + serverConfig.Port)
 }

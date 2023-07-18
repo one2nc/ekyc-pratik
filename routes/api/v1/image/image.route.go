@@ -7,18 +7,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterImageRoutes(v1Group *gin.RouterGroup, appController *handlers.ApplicationController) {
-	imageController := appController.ImageController
+func RegisterImageRoutes(v1Group *gin.RouterGroup, appHandler *handlers.ApplicationHandler) {
+	imageHandler := appHandler.ImageHandler
 	imageGroup := v1Group.Group("/image")
 	{
 		imageGroup.POST("/upload",
-			middlewares.AuthMiddleware(&imageController.CustomerService),
-			imageController.UplaodImage)
+			middlewares.AuthMiddleware(&imageHandler.CustomerService),
+			imageHandler.UplaodImage)
 		imageGroup.POST("/face-match",
-			middlewares.AuthMiddleware(&imageController.CustomerService),
-			imageController.FaceMatch)
+			middlewares.AuthMiddleware(&imageHandler.CustomerService),
+			imageHandler.FaceMatch)
 		imageGroup.POST("/ocr",
-			middlewares.AuthMiddleware(&imageController.CustomerService),
-			imageController.GetOcrData)
+			middlewares.AuthMiddleware(&imageHandler.CustomerService),
+			imageHandler.GetOcrData)
 	}
 }

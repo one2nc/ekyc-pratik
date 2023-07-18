@@ -26,11 +26,11 @@ func main() {
 
 	appService := service.NewApplicationService(applicationRepository)
 	crons.RegisterCron(appService)
-	appController := handlers.NewApplicationController(appService)
+	appHandler := handlers.NewApplicationHandler(appService)
 
 	serverConfig := server.ServerConfig{
 		Port:    os.Getenv("SERVER_PORT"),
 		Address: os.Getenv("SERVER_HOST"),
 	}
-	server.InitiateServer(serverConfig, appController)
+	server.InitiateServer(serverConfig, appHandler)
 }

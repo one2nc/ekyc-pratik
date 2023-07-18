@@ -14,19 +14,19 @@ import (
 	"github.com/google/uuid"
 )
 
-type CustomerControllers struct {
+type CustomerHandlers struct {
 	CustomerService service.CustomerService
 	PlansService    service.PlansService
 }
 
-func newCustomerController(customerService *service.CustomerService, plansService *service.PlansService) *CustomerControllers {
-	return &CustomerControllers{
+func newCustomerHandler(customerService *service.CustomerService, plansService *service.PlansService) *CustomerHandlers {
+	return &CustomerHandlers{
 		CustomerService: *customerService,
 		PlansService:    *plansService,
 	}
 }
 
-func (cc *CustomerControllers) RegisterCustomer(c *gin.Context) {
+func (cc *CustomerHandlers) RegisterCustomer(c *gin.Context) {
 
 	var signupRequest requests.SignupRequest
 
@@ -54,7 +54,7 @@ func (cc *CustomerControllers) RegisterCustomer(c *gin.Context) {
 
 }
 
-func (i *CustomerControllers) GetAggregatedReport(c *gin.Context) {
+func (i *CustomerHandlers) GetAggregatedReport(c *gin.Context) {
 	customer, _ := c.Get("customer")
 	customerModel := customer.(model.Customer)
 
@@ -99,7 +99,7 @@ func (i *CustomerControllers) GetAggregatedReport(c *gin.Context) {
 	c.Abort()
 
 }
-func (i *CustomerControllers) GetAggregatedReportForAllCustomers(c *gin.Context) {
+func (i *CustomerHandlers) GetAggregatedReportForAllCustomers(c *gin.Context) {
 	// customer, _ := c.Get("customer")
 	// customerModel := customer.(model.Customer)
 

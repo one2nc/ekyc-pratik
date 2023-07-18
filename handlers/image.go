@@ -11,12 +11,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type ImageControllers struct {
+type ImageHandlers struct {
 	CustomerService service.CustomerService
 	ImageService    service.ImageService
 }
 
-func (i *ImageControllers) UplaodImage(c *gin.Context) {
+func (i *ImageHandlers) UplaodImage(c *gin.Context) {
 	customer, _ := c.Get("customer")
 	customerModel := customer.(model.Customer)
 
@@ -55,7 +55,7 @@ func (i *ImageControllers) UplaodImage(c *gin.Context) {
 		"image_id": result.ImageId.String(),
 	})
 }
-func (i *ImageControllers) FaceMatch(c *gin.Context) {
+func (i *ImageHandlers) FaceMatch(c *gin.Context) {
 	customer, _ := c.Get("customer")
 	customerModel := customer.(model.Customer)
 
@@ -83,7 +83,7 @@ func (i *ImageControllers) FaceMatch(c *gin.Context) {
 	c.AbortWithStatusJSON(http.StatusCreated, gin.H{"faceMatchScore": results.Score})
 
 }
-func (i *ImageControllers) GetOcrData(c *gin.Context) {
+func (i *ImageHandlers) GetOcrData(c *gin.Context) {
 	customer, _ := c.Get("customer")
 	customerModel := customer.(model.Customer)
 
@@ -108,8 +108,8 @@ func (i *ImageControllers) GetOcrData(c *gin.Context) {
 
 }
 
-func newImageController(customerService *service.CustomerService, imageService *service.ImageService) *ImageControllers {
-	return &ImageControllers{
+func newImageHandler(customerService *service.CustomerService, imageService *service.ImageService) *ImageHandlers {
+	return &ImageHandlers{
 		CustomerService: *customerService,
 
 		ImageService: *imageService,

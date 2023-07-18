@@ -9,9 +9,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterV1Routes(apiGroup *gin.RouterGroup, appController *handlers.ApplicationController) {
+func RegisterV1Routes(apiGroup *gin.RouterGroup, appHandler *handlers.ApplicationHandler) {
 	v1Group := apiGroup.Group("/v1")
-	auth.RegisterAuthRoutes(v1Group, appController)
-	image.RegisterImageRoutes(v1Group, appController)
-	report.RegisterReportRoutes(v1Group, appController)
+	auth.RegisterAuthRoutes(v1Group, appHandler)
+	image.RegisterImageRoutes(v1Group, appHandler)
+	report.RegisterReportRoutes(v1Group, appHandler)
 }
