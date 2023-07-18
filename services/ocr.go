@@ -8,7 +8,7 @@ import (
 )
 
 type OCRService struct {
-	OCRRepository *repository.OCRRepository
+	OCRRepository repository.IOCRRepository
 }
 
 func (o *OCRService) CreateOCRData(ocrData *model.OCRData) error {
@@ -55,7 +55,7 @@ func (o *OCRService) OCRExtractData() (map[string]interface{}, error) {
 	return userDetails, err
 }
 
-func newOCRService(ocrRepository *repository.OCRRepository) *OCRService {
+func newOCRService(ocrRepository repository.IOCRRepository) *OCRService {
 	return &OCRService{
 		OCRRepository: ocrRepository,
 	}

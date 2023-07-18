@@ -45,10 +45,21 @@ type OCRResult struct {
 type ImageService struct {
 	imageRepository          repository.IImageRepository
 	plansRepository          repository.IPlansRepository
-	faceMatchScoreRepository *repository.FaceMatchScoreRepository
-	ocrRepository            *repository.OCRRepository
+	faceMatchScoreRepository repository.IFaceMatchScoreRepository
+	ocrRepository            repository.IOCRRepository
 	ocrService               *OCRService
 }
+
+func newImageService(imageRepository repository.IImageRepository, plansRepository repository.IPlansRepository, faceMatchScoreRepository repository.IFaceMatchScoreRepository, ocrRepository repository.IOCRRepository, ocrService *OCRService) *ImageService {
+	return &ImageService{
+		imageRepository:          imageRepository,
+		plansRepository:          plansRepository,
+		faceMatchScoreRepository: faceMatchScoreRepository,
+		ocrRepository:            ocrRepository,
+		ocrService:               ocrService,
+	}
+}
+
 
 func (i *ImageService) CreateImage(image *model.Image) error {
 	err := i.imageRepository.CreateImage(image)
@@ -272,12 +283,3 @@ func (i *ImageService) GenerateFacteMatchScore() int {
 
 }
 
-func newImageService(imageRepository repository.IImageRepository, plansRepository repository.IPlansRepository, faceMatchScoreRepository *repository.FaceMatchScoreRepository, ocrRepository *repository.OCRRepository, ocrService *OCRService) *ImageService {
-	return &ImageService{
-		imageRepository:          imageRepository,
-		plansRepository:          plansRepository,
-		faceMatchScoreRepository: faceMatchScoreRepository,
-		ocrRepository:            ocrRepository,
-		ocrService:               ocrService,
-	}
-}

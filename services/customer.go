@@ -28,13 +28,13 @@ type CustomerService struct {
 	customerRepository    repository.ICustomerRepository
 	plansRepository       repository.IPlansRepository
 	imageRepository       repository.IImageRepository
-	faceMatchRepository   repository.FaceMatchScoreRepository
-	ocrRepository         repository.OCRRepository
+	faceMatchRepository   repository.IFaceMatchScoreRepository
+	ocrRepository         repository.IOCRRepository
 	dailyReportRepository repository.IDailyReportsRepository
 	RedisRepository       repository.RedisRepository
 }
 
-func newCustomerService(customerRepository repository.ICustomerRepository, plansRepository repository.IPlansRepository, imageRepository repository.IImageRepository, faceMatchRepository repository.FaceMatchScoreRepository, ocrRepository repository.OCRRepository, dailyReportRepository repository.IDailyReportsRepository, redisRepository repository.RedisRepository) *CustomerService {
+func newCustomerService(customerRepository repository.ICustomerRepository, plansRepository repository.IPlansRepository, imageRepository repository.IImageRepository, faceMatchRepository repository.IFaceMatchScoreRepository, ocrRepository repository.IOCRRepository, dailyReportRepository repository.IDailyReportsRepository, redisRepository repository.RedisRepository) *CustomerService {
 	return &CustomerService{
 		customerRepository:    customerRepository,
 		plansRepository:       plansRepository,

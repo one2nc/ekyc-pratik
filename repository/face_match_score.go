@@ -13,12 +13,17 @@ type FaceMatchAPIReport struct {
 	TotalApiCharge float64
 	TotalApiCount  int
 }
-
+type IFaceMatchScoreRepository interface{
+	CreateFaceMatchScore(faceScoreData *model.FaceMatchScore) error
+	CreateFaceMatchScoreAPIRecord(faceMatchApiData *model.FaceMatchAPICall) error
+	FetchScoreByImageAndCustomerId(imageId1 string, imageId2 string, customerId string) (*model.FaceMatchScore, error)
+	GetFaceMatchAPIReport(startDate time.Time, endDate time.Time) (map[uuid.UUID]FaceMatchAPIReport, error)
+}
 type FaceMatchScoreRepository struct {
 	dbInstance *gorm.DB
 }
 
-func newFaceMatchScoreRepository(db *gorm.DB) *FaceMatchScoreRepository {
+func newFaceMatchScoreRepository(db *gorm.DB) IFaceMatchScoreRepository {
 	return &FaceMatchScoreRepository{
 		dbInstance: db,
 	}

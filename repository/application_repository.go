@@ -9,8 +9,8 @@ type ApplicationRepository struct {
 	CustomerRepository       ICustomerRepository
 	PlansRepository          IPlansRepository
 	ImageRepository          IImageRepository
-	FaceMatchScoreRepository *FaceMatchScoreRepository
-	OCRRepository            *OCRRepository
+	FaceMatchScoreRepository IFaceMatchScoreRepository
+	OCRRepository            IOCRRepository
 	DailyReportsRepository   IDailyReportsRepository
 	RedisRepository          RedisRepository
 }

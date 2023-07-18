@@ -6,9 +6,9 @@ import (
 )
 
 type FaceMatchScoreService struct {
-	faceMatchScoreRepository *repository.FaceMatchScoreRepository
+	faceMatchScoreRepository repository.IFaceMatchScoreRepository
 }
-func newFaceMatchScoreService(faceMatchScoreRepository *repository.FaceMatchScoreRepository) *FaceMatchScoreService {
+func newFaceMatchScoreService(faceMatchScoreRepository repository.IFaceMatchScoreRepository) *FaceMatchScoreService {
 	return &FaceMatchScoreService{
 		faceMatchScoreRepository: faceMatchScoreRepository,
 	}

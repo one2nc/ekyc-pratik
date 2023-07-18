@@ -10,8 +10,8 @@ import (
 
 type CustomerAggregatedReport struct {
 	CustomerID              uuid.UUID `json:"customer_id"`
-	StartDate               time.Time    `json:"start_date_of_report"`
-	EndDate                 time.Time    `json:"end_date_of_report"`
+	StartDate               time.Time `json:"start_date_of_report"`
+	EndDate                 time.Time `json:"end_date_of_report"`
 	TotalBaseCharge         float64   `json:"total_base_charge"`
 	TotalFaceMatchCount     int       `json:"total_face_match_count"`
 	TotalFaceMatchCost      float64   `json:"total_face_match_cost"`

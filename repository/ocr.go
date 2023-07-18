@@ -8,17 +8,23 @@ import (
 	"gorm.io/gorm"
 )
 
-type OCRRepository struct {
-	dbInstance *gorm.DB
-}
-
 type OCRAPIReport struct {
 	CustomerId     uuid.UUID
 	TotalApiCharge float64
 	TotalApiCount  int
 }
 
-func newOCRRepositoty(db *gorm.DB) *OCRRepository {
+type IOCRRepository interface {
+	CreateOCRData(ocrData *model.OCRData) error
+	GetOCRDataForCustomerByImageId(imageId string, customerId string) (*model.OCRData, error)
+	CreateOcrAPICall(ocrDataModel *model.OCRAPICalls) error
+	GetOCRAPIReport(startDate time.Time, endDate time.Time) (map[uuid.UUID]OCRAPIReport, error)
+}
+type OCRRepository struct {
+	dbInstance *gorm.DB
+}
+
+func newOCRRepositoty(db *gorm.DB) IOCRRepository {
 
 	return &OCRRepository{
 		dbInstance: db,
