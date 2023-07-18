@@ -15,18 +15,17 @@ func scheduleReportCron(c *cron.Cron, appService *service.ApplicationService) {
 
 		lockKey := "daily_reports_cron_job_key"
 		lockValue := true
-		expiration := time.Duration.Minutes(1)
+		expiration := 10 * time.Second
 
-		acquired, err := appService.CustomerService.RedisRepository.SetNX(context.Background(), lockKey, lockValue, time.Duration(expiration))
+		acquired, err := appService.CustomerService.RedisRepository.SetNX(context.Background(), lockKey, lockValue, expiration)
 
 		if err != nil {
 			log.Print(err.Error())
 		}
 		if acquired {
-
 			currentTime := time.Now().UTC()
 			startTime := time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day()-1, 0, 0, 0, 0, time.UTC)
-			endTime := time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day()-1, 23, 59, 59, 0, time.UTC)
+			endTime := time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day() - 1, 23, 59, 59, 0, time.UTC)
 
 			err = appService.CustomerService.CreateCustomerReports(startTime, endTime)
 

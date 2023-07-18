@@ -206,13 +206,14 @@ make run
 
 | Body Parameters | Type     | Description                |
 | :-------- | :------- | :------------------------- |
-| `start_date` | `string,date(yyyy-mm-dd)` | **Required**. |
-| `end_date` | `string,date(yyyy-mm-dd)` | **Required**. |
+| `start_date` | `string,date(yyyy-mm-dd hr:mm:ss)` | **Required**. |
+| `end_date` | `string,date(yyyy-mm-dd hr:mm:ss)` | **Required**. |
 - Customer can get an aggregated report for dates between start_date and end_date
 
 #### response
 | Body Parameters | Type     |
 | :-------- | :------- | 
+| `customer_id` | `string` |  
 | `start_date_of_report` | `string` |  
 | `end_date_of_report` | `string` |
 | `total_base_charge` | `float` |
@@ -222,4 +223,48 @@ make run
 | `total_ocr_cost` | `float` |
 | `total_image_storage_size_mb` | `float` |
 | `total_image_storage_cost` | `float` |
-| `total_api_call_charges` | `int` |
+| `total_api_call_charges` | `float` |
+| `total_invoice_amount` | `float` |
+| `plan_name` | `string` |
+
+
+
+
+#### All Reports 
+```http
+  POST /api/v1/reports/get-all-reports
+```
+| Headers | Description     
+| :-------- | :------- |
+| `Access-Key` |  **Required**. |
+| `Secret-Key` |  **Required**. |
+- These headers are set automatically by env variables and scripts.
+
+
+| Body Parameters | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `start_date` | `string,date(yyyy-mm-dd hr:mm:ss)` | **Required**. |
+| `end_date` | `string,date(yyyy-mm-dd hr:mm:ss)` | **Required**. |
+- Customer can get an aggregated report for dates between start_date and end_date
+
+#### response
+| Body Parameters | Type     |
+| :-------- | :------- | 
+| `reports[].customer_id` | `string` |  
+| `reports[].start_date_of_report` | `string` |  
+| `reports[].end_date_of_report` | `string` |
+| `reports[].total_base_charge` | `float` |
+| `reports[].total_face_match_count` | `int` |
+| `reports[].total_face_match_cost` | `float` |
+| `reports[].total_ocr_count` | `int` |
+| `reports[].total_ocr_cost` | `float` |
+| `reports[].total_image_storage_size_mb` | `float` |
+| `reports[].total_image_storage_cost` | `float` |
+| `reports[].total_api_call_charges` | `int` |
+| `reports[].total_invoice_amount` | `float` |
+| `reports[].plan_name` | `string` |
+| `start_date_of_report` | `string` |
+| `end_date_of_report` | `string` |
+
+
+

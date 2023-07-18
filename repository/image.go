@@ -57,9 +57,9 @@ func (i *ImageRepository) GetImageUploadAPIReport(startDate time.Time, endDate t
 		Group("image_upload_api_calls.customer_id").
 		Rows()
 
-		results := map[uuid.UUID]ImageUploadAPIReport{}
+	results := map[uuid.UUID]ImageUploadAPIReport{}
 	if err != nil {
-		return results,err
+		return results, err
 	}
 	defer rows.Close()
 
@@ -82,10 +82,10 @@ func (i *ImageRepository) GetOcrUploadAPIReport(startDate time.Time, endDate tim
 		Where("image_upload_api_calls.created_at BETWEEN ? AND ?", startDate, endDate).
 		Group("image_upload_api_calls.customer_id").
 		Rows()
-		
-		results := map[uuid.UUID]ImageUploadAPIReport{}
+
+	results := map[uuid.UUID]ImageUploadAPIReport{}
 	if err != nil {
-	return results,err
+		return results, err
 	}
 	defer rows.Close()
 

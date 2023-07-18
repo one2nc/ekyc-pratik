@@ -10,6 +10,7 @@ import (
 type DailyReport struct {
 	ID                      uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primary_key"`
 	CustomerID              uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();not null"`
+	PlanName                string    `gorm:"-"`
 	DateOfReport            time.Time `gorm:"not null"`
 	DailyBaseCharges        float64   `gorm:"not null"`
 	NoOfFaceMatch           int       `gorm:"not null"`

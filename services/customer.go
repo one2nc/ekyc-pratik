@@ -91,7 +91,7 @@ func (c *CustomerService) GetCustomerByCredendials(accessKey string, secretKey s
 
 	customer, err := c.customerRepository.GetCustomerByCredendials(accessKey, secretKey)
 	if err != nil {
-		return customer, errors.New("error while fetching customers")
+		return customer, errors.New("error while fetching customer")
 
 	}
 	return customer, nil
@@ -134,6 +134,7 @@ func (c *CustomerService) CreateCustomerReports(startDate time.Time, endDate tim
 		imageUploadCost := imageUploadCharge[customer.ID].TotalUploadCharges
 		imageUploadSize := imageUploadCharge[customer.ID].TotalImageSize
 		reports = append(reports, model.DailyReport{
+			PlanName: customer.Plan.PlanName,
 			CustomerID:              customer.ID,
 			DateOfReport:            startDate,
 			DailyBaseCharges:        baseCharge,
@@ -143,7 +144,7 @@ func (c *CustomerService) CreateCustomerReports(startDate time.Time, endDate tim
 			TotalImageStorageCost:   imageUploadCost,
 			NumberOfOCR:             ocrCount,
 			TotalCostOfOCR:          ocrCost,
-			TotalAPICallCharges:     baseCharge + ocrCost + faceMatchCost + imageUploadCost,
+			TotalAPICallCharges:     ocrCost + faceMatchCost + imageUploadCost,
 		})
 	}
 	err = c.dailyReportRepository.BulkCreateDailyReports(reports)
@@ -154,9 +155,9 @@ func (c *CustomerService) CreateCustomerReports(startDate time.Time, endDate tim
 	return err
 }
 
-func (c *CustomerService) GetAggregateReportForCustomer(startDate time.Time, endDate time.Time, customerId uuid.UUID) (repository.CustomerAggregatedReport, error) {
+func (c *CustomerService) GetAggregateReportForCustomer(startDate time.Time, endDate time.Time, customerIds []uuid.UUID) ([]repository.CustomerAggregatedReport, error) {
 
-	report, err := c.dailyReportRepository.GetCustomersAggregatedReportByDates(startDate, endDate, customerId.String())
+	report, err := c.dailyReportRepository.GetCustomersAggregatedReportByDates(startDate, endDate, customerIds)
 	return report, err
 
 }

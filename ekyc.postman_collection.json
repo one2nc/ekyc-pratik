@@ -38,7 +38,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\":\"pratik\",\n    \"plan\":\"enterprise\",\n    \"email\":\"pratik7@gmail.com\"\n}",
+							"raw": "{\n    \"name\":\"pratik\",\n    \"plan\":\"basic\",\n    \"email\":\"pratik2@gmail.com\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -95,7 +95,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"image_id_1\":\"d41773c4-5ba6-49c1-86fc-ae5d8c4ed0f1\",\n    \"image_id_2\":\"7cf347b4-7734-4e02-aee5-17e0b6df5a4a\"\n}",
+							"raw": "{\n    \"image_id_1\":\"34d215eb-9e3c-48bc-820d-4b89907b4416\",\n    \"image_id_2\":\"7630549b-7a39-4a45-8070-543245859b85\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -214,7 +214,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"image_id\":\"b3977e2d-ca2f-4712-a219-ef70138796a5\"\n}",
+							"raw": "{\n    \"image_id\":\"81a382ca-43b8-422d-8401-8501ab378d18\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -241,6 +241,67 @@
 		{
 			"name": "report",
 			"item": [
+				{
+					"name": "all reports",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"baseURL\",\"http://127.0.0.1:3000\");",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Access-Key",
+								"value": "{{access_key}}",
+								"type": "default"
+							},
+							{
+								"key": "Secret-Key",
+								"value": "{{secret_key}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"start_date\" :\"2023-07-15 00:00:00\",\n    \"end_date\":\"2023-07-19 00:00:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/api/v1/report/get-all-reports",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"report",
+								"get-all-reports"
+							]
+						}
+					},
+					"response": []
+				},
 				{
 					"name": "report",
 					"event": [
@@ -280,7 +341,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"start_date\" :\"2023-07-14\",\n    \"end_date\":\"2023-07-18\"\n}",
+							"raw": "{\n    \"start_date\" :\"2023-07-14 00:00:00\",\n    \"end_date\":\"2023-07-19 00:00:00\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
