@@ -1,16 +1,19 @@
-package repository
+package mockedrepository
 
 import (
 	"go-ekyc/model"
+	"go-ekyc/repository"
 	"time"
 
 	"github.com/google/uuid"
 )
 
 type ImageRepositoryMock struct {
-	images []model.Image
+	images                []model.Image
+	imageUploadApiReports map[uuid.UUID]repository.ImageUploadAPIReport
 }
-func newImageMockRepository() IImageRepository {
+
+func newImageMockRepository() repository.IImageRepository {
 	return &ImageRepositoryMock{}
 }
 
@@ -20,11 +23,9 @@ func (i *ImageRepositoryMock) CreateImage(image *model.Image) error {
 	return nil
 
 }
-func (i *ImageRepositoryMock) GetImageUploadAPIReport(startDate time.Time, endDate time.Time) (map[uuid.UUID]ImageUploadAPIReport, error) {
+func (i *ImageRepositoryMock) GetImageUploadAPIReport(startDate time.Time, endDate time.Time) (map[uuid.UUID]repository.ImageUploadAPIReport, error) {
 
-	results := map[uuid.UUID]ImageUploadAPIReport{}
-
-	return results, nil
+	return i.imageUploadApiReports, nil
 }
 
 func (i *ImageRepositoryMock) CreateImageUploadRecord(imageUploadData *model.ImageUploadAPICall) error {
@@ -47,4 +48,3 @@ func (i *ImageRepositoryMock) FindImagesByIdForCustomer(imageIds []string, custo
 	}
 	return images, nil
 }
-

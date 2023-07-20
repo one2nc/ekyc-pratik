@@ -2,6 +2,7 @@ package crons
 
 import (
 	"context"
+	"go-ekyc/config"
 	service "go-ekyc/services"
 	"log"
 	"time"
@@ -9,9 +10,9 @@ import (
 	"github.com/robfig/cron"
 )
 
-func scheduleReportCron(c *cron.Cron, appService *service.ApplicationService) {
+func scheduleReportCron(c *cron.Cron,config config.CronConfig, appService *service.ApplicationService) {
 
-	c.AddFunc("0 0 0 * * *", func() {
+	c.AddFunc(config.DailyReportExpression, func() {
 
 		lockKey := "daily_reports_cron_job_key"
 		lockValue := true

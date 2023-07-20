@@ -74,34 +74,9 @@ func (i *ImageRepository) GetImageUploadAPIReport(startDate time.Time, endDate t
 	}
 	return results, nil
 }
-func (i *ImageRepository) GetOcrUploadAPIReport(startDate time.Time, endDate time.Time) (map[uuid.UUID]ImageUploadAPIReport, error) {
 
-	rows, err := i.dbInstance.Table("ekyc_schema.image_upload_api_calls").
-		Select("image_upload_api_calls.customer_id, SUM(images.file_size_mb) AS total_image_size, SUM(image_storage_charges) as total_upload_charges, COUNT(*) as total_api_count").
-		Joins("JOIN ekyc_schema.images ON image_upload_api_calls.image_id=images.id").
-		Where("image_upload_api_calls.created_at BETWEEN ? AND ?", startDate, endDate).
-		Group("image_upload_api_calls.customer_id").
-		Rows()
 
-	results := map[uuid.UUID]ImageUploadAPIReport{}
-	if err != nil {
-		return results, err
-	}
-	defer rows.Close()
-
-	// Iterate over the rows and retrieve the results
-	for rows.Next() {
-		result := ImageUploadAPIReport{}
-		err := i.dbInstance.ScanRows(rows, &result)
-		if err != nil {
-			return results, err
-		}
-		results[result.CustomerId] = result
-	}
-	return results, nil
-}
-
-func newImageRepository(db *gorm.DB) *ImageRepository {
+func newImageRepository(db *gorm.DB) IImageRepository {
 	return &ImageRepository{
 		dbInstance: db,
 	}

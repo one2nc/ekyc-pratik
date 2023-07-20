@@ -48,18 +48,19 @@ type ImageService struct {
 	faceMatchScoreRepository repository.IFaceMatchScoreRepository
 	ocrRepository            repository.IOCRRepository
 	ocrService               *OCRService
+	minioService             *MinioService
 }
 
-func newImageService(imageRepository repository.IImageRepository, plansRepository repository.IPlansRepository, faceMatchScoreRepository repository.IFaceMatchScoreRepository, ocrRepository repository.IOCRRepository, ocrService *OCRService) *ImageService {
+func newImageService(imageRepository repository.IImageRepository, plansRepository repository.IPlansRepository, faceMatchScoreRepository repository.IFaceMatchScoreRepository, ocrRepository repository.IOCRRepository, ocrService *OCRService, minioService *MinioService) *ImageService {
 	return &ImageService{
 		imageRepository:          imageRepository,
 		plansRepository:          plansRepository,
 		faceMatchScoreRepository: faceMatchScoreRepository,
 		ocrRepository:            ocrRepository,
 		ocrService:               ocrService,
+		minioService:             minioService,
 	}
 }
-
 
 func (i *ImageService) CreateImage(image *model.Image) error {
 	err := i.imageRepository.CreateImage(image)
@@ -97,16 +98,14 @@ func (i *ImageService) UploadImage(input UploadImageInput) (ImageUploadResult, e
 		ImageType:     imageType,
 	}
 
-	minioService, err := NewMinioService()
-
 	if err != nil {
 
 		return ImageUploadResult{}, err
 
 	}
-	bucketName := minioService.MinioConfig.ImageBucket
+	bucketName := i.minioService.MinioConfig.ImageBucket
 	connectionType := "application/" + fileExtension
-	err = minioService.UploadFileToMinio(bucketName, filePath, file, fileSizeBytes, connectionType)
+	err = i.minioService.UploadFileToMinio(bucketName, filePath, file, fileSizeBytes, connectionType)
 	if err != nil {
 
 		return ImageUploadResult{}, err
@@ -282,4 +281,3 @@ func (i *ImageService) GenerateFacteMatchScore() int {
 	return randomNumber
 
 }
-

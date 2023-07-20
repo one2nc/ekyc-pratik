@@ -2,7 +2,8 @@ package repository
 
 import (
 	"go-ekyc/config"
-	"go-ekyc/db"
+
+	"gorm.io/gorm"
 )
 
 type ApplicationRepository struct {
@@ -15,11 +16,7 @@ type ApplicationRepository struct {
 	RedisRepository          RedisRepository
 }
 
-func NewApplicationRepository() (*ApplicationRepository, error) {
-	db, err := db.InitiateDB()
-	if err != nil {
-		return nil, err
-	}
+func NewApplicationRepository(db *gorm.DB) (*ApplicationRepository, error) {
 
 	redisConfig := config.NewRedisConfig()
 	redisRepository, err := newRedisRepository(redisConfig)

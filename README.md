@@ -1,6 +1,7 @@
 # EKyc
 EKyc is a system that manages user kyc. It provides API based solution for face matching and OCR.<br/> 
 The purpose of this exercise is for you to get familiar with building HTTP API with tests on a real-world use case. This exercise will give you enough idea about building REST APIs in Golang that uses Database, Async workers and Caches, which are the most common components of any web application.
+
 ----
 ## Features
 
@@ -67,6 +68,7 @@ make setup-down
 | `MINIO_IMAGE_ENDPOINT` | MinIO endpoint for api
 | `REDIS_ADDRESS` | Redis address
 | `REDIS_PORT` | Redis port
+| `DAILY_REPORT_CRON_EXPRESSION` | Cron expression for daily reports generation
 
 ----
 ## Migrations
@@ -195,7 +197,7 @@ make run
 ---
 #### Reports 
 ```http
-  POST /api/v1/reports/
+  GET /api/v1/reports/
 ```
 | Headers | Description     
 | :-------- | :------- |
@@ -204,7 +206,7 @@ make run
 - These headers are set automatically by env variables and scripts.
 
 
-| Body Parameters | Type     | Description                |
+| Query Parameters | Type     | Description                |
 | :-------- | :------- | :------------------------- |
 | `start_date` | `string,date(yyyy-mm-dd hr:mm:ss)` | **Required**. |
 | `end_date` | `string,date(yyyy-mm-dd hr:mm:ss)` | **Required**. |
@@ -213,26 +215,26 @@ make run
 #### response
 | Body Parameters | Type     |
 | :-------- | :------- | 
-| `customer_id` | `string` |  
-| `start_date_of_report` | `string` |  
-| `end_date_of_report` | `string` |
-| `total_base_charge` | `float` |
-| `total_face_match_count` | `int` |
-| `total_face_match_cost` | `float` |
-| `total_ocr_count` | `int` |
-| `total_ocr_cost` | `float` |
-| `total_image_storage_size_mb` | `float` |
-| `total_image_storage_cost` | `float` |
-| `total_api_call_charges` | `float` |
-| `total_invoice_amount` | `float` |
-| `plan_name` | `string` |
+| `report.customer_id` | `string` |  
+| `report.start_date_of_report` | `string` |  
+| `report.end_date_of_report` | `string` |
+| `report.total_base_charge` | `float` |
+| `report.total_face_match_count` | `int` |
+| `report.total_face_match_cost` | `float` |
+| `report.total_ocr_count` | `int` |
+| `report.total_ocr_cost` | `float` |
+| `report.total_image_storage_size_mb` | `float` |
+| `report.total_image_storage_cost` | `float` |
+| `report.total_api_call_charges` | `float` |
+| `report.total_invoice_amount` | `float` |
+| `report.plan_name` | `string` |
 
 
 
 
 #### All Reports 
 ```http
-  POST /api/v1/reports/get-all-reports
+  GET /api/v1/reports/get-all-reports
 ```
 | Headers | Description     
 | :-------- | :------- |
@@ -241,7 +243,7 @@ make run
 - These headers are set automatically by env variables and scripts.
 
 
-| Body Parameters | Type     | Description                |
+| Query Parameters | Type     | Description                |
 | :-------- | :------- | :------------------------- |
 | `start_date` | `string,date(yyyy-mm-dd hr:mm:ss)` | **Required**. |
 | `end_date` | `string,date(yyyy-mm-dd hr:mm:ss)` | **Required**. |

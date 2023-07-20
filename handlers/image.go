@@ -32,7 +32,7 @@ func (i *ImageHandlers) UplaodImage(c *gin.Context) {
 
 	if imageType == "" || !helper.IsImageTypeValid(imageType) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"errorMessage": "Invalid image type. valid type are face or id_card",
+			"errorMessages": []string{"Invalid image type. valid type are face or id_card"},
 		})
 		return
 	}
@@ -46,7 +46,7 @@ func (i *ImageHandlers) UplaodImage(c *gin.Context) {
 
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"errorMessage": err.Error(),
+			"errorMessages": []string{err.Error()},
 		})
 		return
 	}
@@ -62,12 +62,13 @@ func (i *ImageHandlers) FaceMatch(c *gin.Context) {
 	var faceMatchRequest requests.FaceMatchRequest
 
 	if err := c.ShouldBindJSON(&faceMatchRequest); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessage": err.Error()})
+
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessages": helper.ErrorParser(err)})
 		return
 	}
 
 	if faceMatchRequest.ImageId1 == faceMatchRequest.ImageId2 {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessage": "Cannot use same ids"})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessages": []string{"Cannot use same ids"}})
 		return
 	}
 	results, err := i.ImageService.FaceMatch(service.FaceMatchInput{
@@ -77,7 +78,7 @@ func (i *ImageHandlers) FaceMatch(c *gin.Context) {
 	})
 
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessage": err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessages": []string{err.Error()}})
 		return
 	}
 	c.AbortWithStatusJSON(http.StatusCreated, gin.H{"faceMatchScore": results.Score})
@@ -90,7 +91,7 @@ func (i *ImageHandlers) GetOcrData(c *gin.Context) {
 	var ocrRequest requests.OCRRequest
 
 	if err := c.ShouldBindJSON(&ocrRequest); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessage": err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessages": helper.ErrorParser(err)})
 		return
 	}
 
@@ -98,7 +99,7 @@ func (i *ImageHandlers) GetOcrData(c *gin.Context) {
 	result, err := i.ImageService.GetOCRData(service.OCRInput{Customer: customerModel, ImageId: ocrRequest.ImageId1})
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"errorMessage": err.Error(),
+			"errorMessages": []string{err.Error()},
 		})
 		return
 	}

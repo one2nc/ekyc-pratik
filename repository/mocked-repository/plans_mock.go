@@ -1,8 +1,9 @@
-package repository
+package mockedrepository
 
 import (
 	"errors"
 	"go-ekyc/model"
+	"go-ekyc/repository"
 
 	"github.com/google/uuid"
 )
@@ -10,7 +11,8 @@ import (
 type PlansMockRepository struct {
 	plans []model.Plan
 }
-func newPlansMockRepository(plans []model.Plan) IPlansRepository {
+
+func newPlansMockRepository(plans []model.Plan) repository.IPlansRepository {
 	return &PlansMockRepository{
 		plans: plans,
 	}
@@ -36,5 +38,3 @@ func (c *PlansMockRepository) FetchPlanById(id uuid.UUID) (model.Plan, error) {
 	}
 	return model.Plan{}, errors.New("Plan not found")
 }
-
-

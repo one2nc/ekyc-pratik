@@ -11,9 +11,9 @@ func RegisterReportRoutes(v1Group *gin.RouterGroup, appHandler *handlers.Applica
 	customerHandler := appHandler.CustomerHandler
 	authGroup := v1Group.Group("/report")
 	{
-		authGroup.POST("/", middlewares.AuthMiddleware(&customerHandler.CustomerService),
+		authGroup.GET("/", middlewares.AuthMiddleware(&customerHandler.CustomerService),
 			customerHandler.GetAggregatedReport)
-		authGroup.POST("/get-all-reports", middlewares.AuthMiddleware(&customerHandler.CustomerService),
+		authGroup.GET("/get-all-reports", middlewares.AuthMiddleware(&customerHandler.CustomerService),
 			customerHandler.GetAggregatedReportForAllCustomers)
 	}
 }

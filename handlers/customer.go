@@ -1,9 +1,8 @@
 package handlers
 
 import (
-	"encoding/json"
-	"fmt"
 	"go-ekyc/handlers/requests"
+	"go-ekyc/helper"
 	"go-ekyc/model"
 	"go-ekyc/repository"
 	service "go-ekyc/services"
@@ -31,7 +30,8 @@ func (cc *CustomerHandlers) RegisterCustomer(c *gin.Context) {
 	var signupRequest requests.SignupRequest
 
 	if err := c.ShouldBindJSON(&signupRequest); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessage": err.Error()})
+
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessages": helper.ErrorParser(err)})
 		return
 	}
 
@@ -42,7 +42,7 @@ func (cc *CustomerHandlers) RegisterCustomer(c *gin.Context) {
 	})
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"errorMessage": err.Error(),
+			"errorMessages": []string{err.Error()},
 		})
 		return
 	}
@@ -60,43 +60,36 @@ func (i *CustomerHandlers) GetAggregatedReport(c *gin.Context) {
 
 	var reportsRequest requests.ReportsRequest
 
-	if err := c.ShouldBindJSON(&reportsRequest); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessage": err.Error()})
+	if err := c.ShouldBindQuery(&reportsRequest); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessages": helper.ErrorParser(err)})
 		return
 	}
-	fmt.Println(reportsRequest.StartDate, reportsRequest.EndDate)
 	startDate, err := time.Parse("2006-01-02 15:04:05", reportsRequest.StartDate)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessage": "Invalid dates. valid format is yyyy-mm-dd hr:mm:ss"})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessages": []string{"Invalid dates. valid format is yyyy-mm-dd hr:mm:ss"}})
 		return
 	}
 	endDate, err := time.Parse("2006-01-02 15:04:05", reportsRequest.EndDate)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessage": "Invalid dates. valid format is yyyy-mm-dd hr:mm:ss"})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessages": []string{"Invalid dates. valid format is yyyy-mm-dd hr:mm:ss"}})
 		return
 	}
 	if endDate.Before(startDate) {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessage": "end_date should to be greater that start_date"})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessages": []string{"end_date should to be greater that start_date"}})
 		return
 	}
 	results, err := i.CustomerService.GetAggregateReportForCustomer(startDate, endDate, []uuid.UUID{customerModel.ID})
 
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessage": err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessages": err.Error()})
 		return
 	}
 
-	report := results[0]
-	report.TotalInvoiceAmount = report.TotalBaseCharge + report.TotalAPICallCharges
-
-	jsonBody, err := json.Marshal(report)
-
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessage": "error while fetching report"})
-		return
+	if len(results) > 0 {
+		c.AbortWithStatusJSON(http.StatusOK, gin.H{"report": results[0]})
+	} else {
+		c.AbortWithStatusJSON(http.StatusOK, gin.H{"report": map[string]interface{}{}})
 	}
-	c.Data(http.StatusOK, "application/json", jsonBody)
-	c.Abort()
 
 }
 func (i *CustomerHandlers) GetAggregatedReportForAllCustomers(c *gin.Context) {
@@ -105,38 +98,32 @@ func (i *CustomerHandlers) GetAggregatedReportForAllCustomers(c *gin.Context) {
 
 	var reportsRequest requests.ReportsRequest
 
-	if err := c.ShouldBindJSON(&reportsRequest); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessage": err.Error()})
+	if err := c.ShouldBindQuery(&reportsRequest); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessages": helper.ErrorParser(err)})
 		return
 	}
-	fmt.Println(reportsRequest.StartDate, reportsRequest.EndDate)
 	startDate, err := time.Parse("2006-01-02 15:04:05", reportsRequest.StartDate)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessage": "Invalid dates. valid format is yyyy-mm-dd hr:mm:ss"})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessages": []string{"Invalid dates. valid format is yyyy-mm-dd hr:mm:ss"}})
 		return
 	}
 	endDate, err := time.Parse("2006-01-02 15:04:05", reportsRequest.EndDate)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessage": "Invalid dates. valid format is yyyy-mm-dd hr:mm:ss"})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessages": []string{"Invalid dates. valid format is yyyy-mm-dd hr:mm:ss"}})
 		return
 	}
 	if endDate.Before(startDate) {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessage": "end_date should to be greater that start_date"})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessages": []string{"end_date should to be greater that start_date"}})
 		return
 	}
 	results, err := i.CustomerService.GetAggregateReportForCustomer(startDate, endDate, []uuid.UUID{})
 
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessage": err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessages": []string{err.Error()}})
 		return
 	}
-	for i, result := range results {
-		results[i].TotalInvoiceAmount = result.TotalBaseCharge + result.TotalAPICallCharges
-		results[i].StartDate = startDate
-		results[i].EndDate = endDate
-	}
 
-	jsonResponse := struct {
+	response := struct {
 		Reports   []repository.CustomerAggregatedReport `json:"reports"`
 		StartDate time.Time                             `json:"start_date_of_report"`
 		EndDate   time.Time                             `json:"end_date_of_report"`
@@ -145,13 +132,7 @@ func (i *CustomerHandlers) GetAggregatedReportForAllCustomers(c *gin.Context) {
 		EndDate:   endDate,
 		Reports:   results,
 	}
-	jsonBody, err := json.Marshal(jsonResponse)
 
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessage": "error while fetching report"})
-		return
-	}
-	c.Data(http.StatusOK, "application/json", jsonBody)
-	c.Abort()
+	c.AbortWithStatusJSON(http.StatusOK, response)
 
 }

@@ -9,19 +9,19 @@ import (
 )
 
 type CustomerAggregatedReport struct {
-	CustomerID              uuid.UUID `json:"customer_id"`
-	StartDate               time.Time `json:"start_date_of_report"`
-	EndDate                 time.Time `json:"end_date_of_report"`
-	TotalBaseCharge         float64   `json:"total_base_charge"`
-	TotalFaceMatchCount     int       `json:"total_face_match_count"`
-	TotalFaceMatchCost      float64   `json:"total_face_match_cost"`
-	TotalOCRCount           int       `json:"total_ocr_count"`
-	TotalOCRCost            float64   `json:"total_ocr_cost"`
-	TotalImageStorageSizeMb float64   `json:"total_image_storage_size_mb"`
-	TotalImageStorageCost   float64   `json:"total_image_storage_cost"`
-	TotalAPICallCharges     float64   `json:"total_api_call_charges"`
-	TotalInvoiceAmount      float64   `json:"total_invoive_amount"`
-	PlanName                string    `json:"plan_name"`
+	CustomerID              uuid.UUID `json:"customer_id,omitempty"`
+	StartDate               time.Time `json:"start_date_of_report,omitempty"`
+	EndDate                 time.Time `json:"end_date_of_report,omitempty"`
+	TotalBaseCharge         float64   `json:"total_base_charge,omitempty"`
+	TotalFaceMatchCount     int       `json:"total_face_match_count,omitempty"`
+	TotalFaceMatchCost      float64   `json:"total_face_match_cost,omitempty"`
+	TotalOCRCount           int       `json:"total_ocr_count,omitempty"`
+	TotalOCRCost            float64   `json:"total_ocr_cost,omitempty"`
+	TotalImageStorageSizeMb float64   `json:"total_image_storage_size_mb,omitempty"`
+	TotalImageStorageCost   float64   `json:"total_image_storage_cost,omitempty"`
+	TotalAPICallCharges     float64   `json:"total_api_call_charges,omitempty"`
+	TotalInvoiceAmount      float64   `json:"total_invoive_amount,omitempty"`
+	PlanName                string    `json:"plan_name,omitempty"`
 }
 
 type IDailyReportsRepository interface {

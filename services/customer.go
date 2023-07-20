@@ -134,7 +134,7 @@ func (c *CustomerService) CreateCustomerReports(startDate time.Time, endDate tim
 		imageUploadCost := imageUploadCharge[customer.ID].TotalUploadCharges
 		imageUploadSize := imageUploadCharge[customer.ID].TotalImageSize
 		reports = append(reports, model.DailyReport{
-			PlanName: customer.Plan.PlanName,
+			PlanName:                customer.Plan.PlanName,
 			CustomerID:              customer.ID,
 			DateOfReport:            startDate,
 			DailyBaseCharges:        baseCharge,
@@ -157,7 +157,12 @@ func (c *CustomerService) CreateCustomerReports(startDate time.Time, endDate tim
 
 func (c *CustomerService) GetAggregateReportForCustomer(startDate time.Time, endDate time.Time, customerIds []uuid.UUID) ([]repository.CustomerAggregatedReport, error) {
 
-	report, err := c.dailyReportRepository.GetCustomersAggregatedReportByDates(startDate, endDate, customerIds)
-	return report, err
+	reports, err := c.dailyReportRepository.GetCustomersAggregatedReportByDates(startDate, endDate, customerIds)
+	for i, report := range reports {
+		reports[i].TotalInvoiceAmount = report.TotalBaseCharge + report.TotalAPICallCharges
+		reports[i].StartDate = startDate
+		reports[i].EndDate = endDate
+	}
+	return reports, err
 
 }

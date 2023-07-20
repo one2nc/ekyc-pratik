@@ -6,7 +6,7 @@ type SignupRequest struct {
 	Email string `json:"email" binding:"required,email"`
 }
 type ReportsRequest struct {
-	StartDate string `json:"start_date" binding:"required"`
-	EndDate   string `json:"end_date" binding:"required"`
+	StartDate string `form:"start_date" binding:"required"`
+	EndDate   string `form:"end_date" binding:"required"`
 }
 

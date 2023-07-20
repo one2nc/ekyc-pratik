@@ -11,17 +11,17 @@ type MinioService struct {
 	minioClient *minio.Client
 	MinioConfig config.MinioConfig
 }
-func NewMinioService() (*MinioService, error) {
+func NewMinioService(config config.MinioConfig ) (*MinioService, error) {
 
-	minioConfig := config.NewMinioConfig()
-	minioClient, err := minio.New(minioConfig.Endpoint, minioConfig.AccessKey, minioConfig.SecretKey, false)
+	
+	minioClient, err := minio.New(config.Endpoint, config.AccessKey, config.SecretKey, false)
 	if err != nil {
 		return nil, err
 	}
 
 	return &MinioService{
 		minioClient: minioClient,
-		MinioConfig: minioConfig,
+		MinioConfig: config,
 	}, nil
 }
 func (m *MinioService) UploadFileToMinio(bucketName string, objName string, file io.Reader, objSize int64, contentType string) error {

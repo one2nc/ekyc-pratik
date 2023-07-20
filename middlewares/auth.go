@@ -16,14 +16,14 @@ func AuthMiddleware(customerService *service.CustomerService) func(*gin.Context)
 
 		// Validate access and secret keys
 		if accessKey == "" || secretKey == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"errorMessage": "Invalid access or secret key"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"errorMessages": []string{"Invalid access or secret key"}})
 			return
 		}
 
 		customer, err := customerService.GetCustomerByCredendials(helper.GetMD5Hash(accessKey), helper.GetMD5Hash(secretKey))
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"errorMessage": err.Error(),
+				"errorMessages": []string{err.Error()},
 			})
 
 			return

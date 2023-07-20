@@ -1,7 +1,8 @@
-package repository
+package mockedrepository
 
 import (
 	"go-ekyc/model"
+	"go-ekyc/repository"
 
 	"gorm.io/gorm"
 )
@@ -10,7 +11,7 @@ type CustomerMockRepository struct {
 	customerList []model.Customer
 }
 
-func newCustomerMockRepository(customer []model.Customer) ICustomerRepository {
+func newCustomerMockRepository(customer []model.Customer) repository.ICustomerRepository {
 
 	return &CustomerMockRepository{
 		customerList: customer,
@@ -43,6 +44,6 @@ func (c CustomerMockRepository) GetCustomerByCredendials(accessKey string, secre
 }
 func (c CustomerMockRepository) GetCustomersWithPlans() ([]model.Customer, error) {
 
-	return []model.Customer{}, gorm.ErrRecordNotFound
-}
+	return c.customerList, nil
 
+}
