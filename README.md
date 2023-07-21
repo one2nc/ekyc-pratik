@@ -18,7 +18,7 @@ git clone https://github.com/one2nc/ekyc-pratik.git
 ----
 
 ## How to setup
-- To set up docker containers of postgres, redis and MinIO from docker-compose file, run.
+- To set up docker containers of postgres and MinIO from docker-compose file, run.
 
 ```sh
 make setup

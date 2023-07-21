@@ -15,10 +15,11 @@ type ApplicationMockRepository struct {
 	RedisRepository repository.RedisRepository
 }
 
-func NewApplicationMockRepository(customerData []model.Customer,plans []model.Plan) (*ApplicationMockRepository) {
+func NewApplicationMockRepository(customerData []model.Customer,plans []model.Plan,images []model.Image,imageUploadApiCalls []model.ImageUploadAPICall) (*ApplicationMockRepository) {
 
 	return &ApplicationMockRepository{
 		CustomerRepository: newCustomerMockRepository(customerData),
 		PlansRepository: newPlansMockRepository(plans),
+		ImageRepository: newImageMockRepository(images,imageUploadApiCalls),
 	}
 }

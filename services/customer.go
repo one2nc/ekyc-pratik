@@ -30,7 +30,7 @@ type CustomerService struct {
 	imageRepository       repository.IImageRepository
 	faceMatchRepository   repository.IFaceMatchScoreRepository
 	ocrRepository         repository.IOCRRepository
-	dailyReportRepository repository.IDailyReportsRepository
+	DailyReportRepository repository.IDailyReportsRepository
 	RedisRepository       repository.RedisRepository
 }
 
@@ -41,7 +41,7 @@ func newCustomerService(customerRepository repository.ICustomerRepository, plans
 		imageRepository:       imageRepository,
 		faceMatchRepository:   faceMatchRepository,
 		ocrRepository:         ocrRepository,
-		dailyReportRepository: dailyReportRepository,
+		DailyReportRepository: dailyReportRepository,
 		RedisRepository:       redisRepository,
 	}
 }
@@ -147,7 +147,7 @@ func (c *CustomerService) CreateCustomerReports(startDate time.Time, endDate tim
 			TotalAPICallCharges:     ocrCost + faceMatchCost + imageUploadCost,
 		})
 	}
-	err = c.dailyReportRepository.BulkCreateDailyReports(reports)
+	err = c.DailyReportRepository.BulkCreateDailyReports(reports)
 	if err != nil {
 		return err
 
@@ -157,7 +157,7 @@ func (c *CustomerService) CreateCustomerReports(startDate time.Time, endDate tim
 
 func (c *CustomerService) GetAggregateReportForCustomer(startDate time.Time, endDate time.Time, customerIds []uuid.UUID) ([]repository.CustomerAggregatedReport, error) {
 
-	reports, err := c.dailyReportRepository.GetCustomersAggregatedReportByDates(startDate, endDate, customerIds)
+	reports, err := c.DailyReportRepository.GetCustomersAggregatedReportByDates(startDate, endDate, customerIds)
 	for i, report := range reports {
 		reports[i].TotalInvoiceAmount = report.TotalBaseCharge + report.TotalAPICallCharges
 		reports[i].StartDate = startDate

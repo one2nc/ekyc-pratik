@@ -2,6 +2,7 @@ package repository
 
 import (
 	"go-ekyc/model"
+	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -27,6 +28,8 @@ type CustomerAggregatedReport struct {
 type IDailyReportsRepository interface {
 	BulkCreateDailyReports(reports []model.DailyReport) error
 	GetCustomersAggregatedReportByDates(startDate time.Time, endDate time.Time, customerId []uuid.UUID) ([]CustomerAggregatedReport, error)
+	AcquireCronLock(lockId int64) bool
+	ReleaseCronLock(lockId int64)
 }
 
 type DailyReportsRepository struct {
@@ -64,4 +67,19 @@ func (r *DailyReportsRepository) GetCustomersAggregatedReportByDates(startDate t
 	result := query.Group("daily_reports_table.customer_id").Group("plans.plan_name").Scan(&reports)
 
 	return reports, result.Error
+}
+
+func (r *DailyReportsRepository) AcquireCronLock(lockId int64) bool {
+	var result bool
+	err := r.dbInstance.Raw("SELECT pg_try_advisory_lock(?)", lockId).Row().Scan(&result)
+	if err != nil {
+		log.Print(err.Error())
+	}
+	return result
+}
+
+func (r *DailyReportsRepository) ReleaseCronLock(lockId int64) {
+
+	r.dbInstance.Exec("SELECT pg_advisory_unlock(?)", lockId)
+
 }

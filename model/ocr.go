@@ -11,7 +11,7 @@ import (
 type OCRData struct {
 	ID         uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primary_key"`
 	CustomerID uuid.UUID      `gorm:"type:uuid;not null"`
-	ImageID1   uuid.UUID      `gorm:"column:image_id;type:uuid;not null"`
+	ImageID   uuid.UUID      `gorm:"column:image_id;type:uuid;not null"`
 	OCRData    datatypes.JSON `gorm:"column:ocr_data;type:jsonb;not null"`
 	CreatedAt  time.Time      `gorm:"not null"`
 	UpdatedAt  time.Time      `gorm:"not null"`

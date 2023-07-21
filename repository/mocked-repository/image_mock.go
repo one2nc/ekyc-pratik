@@ -9,12 +9,15 @@ import (
 )
 
 type ImageRepositoryMock struct {
-	images                []model.Image
-	imageUploadApiReports map[uuid.UUID]repository.ImageUploadAPIReport
+	images              []model.Image
+	imageUploadApiCalls []model.ImageUploadAPICall
 }
 
-func newImageMockRepository() repository.IImageRepository {
-	return &ImageRepositoryMock{}
+func newImageMockRepository(images []model.Image, imageUploadApiCalls []model.ImageUploadAPICall) repository.IImageRepository {
+	return &ImageRepositoryMock{
+		images:              images,
+		imageUploadApiCalls: imageUploadApiCalls,
+	}
 }
 
 func (i *ImageRepositoryMock) CreateImage(image *model.Image) error {
@@ -23,11 +26,6 @@ func (i *ImageRepositoryMock) CreateImage(image *model.Image) error {
 	return nil
 
 }
-func (i *ImageRepositoryMock) GetImageUploadAPIReport(startDate time.Time, endDate time.Time) (map[uuid.UUID]repository.ImageUploadAPIReport, error) {
-
-	return i.imageUploadApiReports, nil
-}
-
 func (i *ImageRepositoryMock) CreateImageUploadRecord(imageUploadData *model.ImageUploadAPICall) error {
 
 	imageUploadData.ID = uuid.New()
@@ -38,13 +36,20 @@ func (i *ImageRepositoryMock) FindImagesByIdForCustomer(imageIds []string, custo
 
 	images := []model.Image{}
 
-	for _, image := range images {
+	for _, image := range i.images {
 
-		for _, imageId := range imageIds {
-			if imageId == image.ID.String() {
-				images = append(images, image)
+		if image.CustomerID.String() == customerId {
+
+			for _, imageId := range imageIds {
+				if imageId == image.ID.String() {
+					images = append(images, image)
+				}
 			}
 		}
 	}
 	return images, nil
+}
+func (i *ImageRepositoryMock) GetImageUploadAPIReport(startDate time.Time, endDate time.Time) (map[uuid.UUID]repository.ImageUploadAPIReport, error) {
+
+	return map[uuid.UUID]repository.ImageUploadAPIReport{}, nil
 }

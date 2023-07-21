@@ -4,3 +4,4 @@ data
 minio-data
 go-ekyc
 redis-data
+.DS_Store

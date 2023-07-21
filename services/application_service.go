@@ -9,7 +9,7 @@ type ApplicationService struct {
 	CustomerService       *CustomerService
 	PlansService          *PlansService
 	ImageService          *ImageService
-	MinioService          *MinioService
+	MinioService          IMinioService
 	FaceMatchScoreService *FaceMatchScoreService
 	OCRService            *OCRService
 }

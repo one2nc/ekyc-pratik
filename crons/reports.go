@@ -1,34 +1,27 @@
 package crons
 
 import (
-	"context"
 	"go-ekyc/config"
 	service "go-ekyc/services"
-	"log"
 	"time"
 
 	"github.com/robfig/cron"
 )
 
-func scheduleReportCron(c *cron.Cron,config config.CronConfig, appService *service.ApplicationService) {
+func scheduleReportCron(c *cron.Cron, config config.CronConfig, appService *service.ApplicationService) {
 
 	c.AddFunc(config.DailyReportExpression, func() {
 
-		lockKey := "daily_reports_cron_job_key"
-		lockValue := true
-		expiration := 10 * time.Second
+		currentTime := time.Now().UTC()
+		startTime := time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day()-1, 0, 0, 0, 0, time.UTC)
+		endTime := time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day()-1, 23, 59, 59, 0, time.UTC)
+		lockKey := startTime.Unix()
 
-		acquired, err := appService.CustomerService.RedisRepository.SetNX(context.Background(), lockKey, lockValue, expiration)
-
-		if err != nil {
-			log.Print(err.Error())
-		}
+		acquired := appService.CustomerService.DailyReportRepository.AcquireCronLock(lockKey)
 		if acquired {
-			currentTime := time.Now().UTC()
-			startTime := time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day()-1, 0, 0, 0, 0, time.UTC)
-			endTime := time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day() - 1, 23, 59, 59, 0, time.UTC)
 
-			err = appService.CustomerService.CreateCustomerReports(startTime, endTime)
+			_ = appService.CustomerService.CreateCustomerReports(startTime, endTime)
+			appService.CustomerService.DailyReportRepository.ReleaseCronLock(lockKey)
 
 		}
 

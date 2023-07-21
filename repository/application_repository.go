@@ -1,8 +1,6 @@
 package repository
 
 import (
-	"go-ekyc/config"
-
 	"gorm.io/gorm"
 )
 
@@ -18,12 +16,12 @@ type ApplicationRepository struct {
 
 func NewApplicationRepository(db *gorm.DB) (*ApplicationRepository, error) {
 
-	redisConfig := config.NewRedisConfig()
-	redisRepository, err := newRedisRepository(redisConfig)
+	// redisConfig := config.NewRedisConfig()
+	// redisRepository, err := newRedisRepository(redisConfig)
 
-	if err != nil {
-		return nil, err
-	}
+	// if err != nil {
+	// 	return nil, err
+	// }
 	return &ApplicationRepository{
 		CustomerRepository:       newCustomerRepository(db),
 		PlansRepository:          newPlansRepository(db),
@@ -31,6 +29,6 @@ func NewApplicationRepository(db *gorm.DB) (*ApplicationRepository, error) {
 		FaceMatchScoreRepository: newFaceMatchScoreRepository(db),
 		OCRRepository:            newOCRRepositoty(db),
 		DailyReportsRepository:   newDailyReportsRepository(db),
-		RedisRepository:          *redisRepository,
+		// RedisRepository:          *redisRepository,
 	}, nil
 }

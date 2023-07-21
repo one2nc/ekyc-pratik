@@ -14,9 +14,20 @@ type IImageRepository interface {
 	FindImagesByIdForCustomer(imageIds []string, customerId string) ([]model.Image, error)
 	GetImageUploadAPIReport(startDate time.Time, endDate time.Time) (map[uuid.UUID]ImageUploadAPIReport, error)
 }
+type ImageUploadAPIReport struct {
+	CustomerId         uuid.UUID
+	TotalUploadCharges float64
+	TotalImageSize     float64
+	TotalApiCount      int32
+}
 
 type ImageRepository struct {
 	dbInstance *gorm.DB
+}
+func newImageRepository(db *gorm.DB) IImageRepository {
+	return &ImageRepository{
+		dbInstance: db,
+	}
 }
 
 func (i *ImageRepository) CreateImage(image *model.Image) error {
@@ -41,12 +52,6 @@ func (i *ImageRepository) FindImagesByIdForCustomer(imageIds []string, customerI
 	return images, result.Error
 }
 
-type ImageUploadAPIReport struct {
-	CustomerId         uuid.UUID
-	TotalUploadCharges float64
-	TotalImageSize     float64
-	TotalApiCount      int32
-}
 
 func (i *ImageRepository) GetImageUploadAPIReport(startDate time.Time, endDate time.Time) (map[uuid.UUID]ImageUploadAPIReport, error) {
 
@@ -76,8 +81,3 @@ func (i *ImageRepository) GetImageUploadAPIReport(startDate time.Time, endDate t
 }
 
 
-func newImageRepository(db *gorm.DB) IImageRepository {
-	return &ImageRepository{
-		dbInstance: db,
-	}
-}

@@ -2,7 +2,6 @@ package service
 
 import (
 	"errors"
-	"fmt"
 	"go-ekyc/model"
 	mockedrepository "go-ekyc/repository/mocked-repository"
 	"reflect"
@@ -11,7 +10,7 @@ import (
 
 func TestCustomerService_RegisterCustomer(t *testing.T) {
 
-	appMockRepository := mockedrepository.NewApplicationMockRepository(mockedrepository.MockedCustomers, mockedrepository.MockedPlans)
+	appMockRepository := mockedrepository.NewApplicationMockRepository(mockedrepository.MockedCustomers, mockedrepository.MockedPlans, mockedrepository.MockedImageData, mockedrepository.MockedImageUploadApiCalls)
 	customerService := newCustomerService(appMockRepository.CustomerRepository, appMockRepository.PlansRepository, appMockRepository.ImageRepository, appMockRepository.FaceMatchScoreRepository, appMockRepository.OCRRepository, appMockRepository.DailyReportsRepository, appMockRepository.RedisRepository)
 
 	testCases := []struct {
@@ -82,7 +81,7 @@ func TestCustomerService_RegisterCustomer(t *testing.T) {
 }
 func TestCustomerService_GetCustomerByCredendials(t *testing.T) {
 
-	appMockRepository := mockedrepository.NewApplicationMockRepository(mockedrepository.MockedCustomers, mockedrepository.MockedPlans)
+	appMockRepository := mockedrepository.NewApplicationMockRepository(mockedrepository.MockedCustomers, mockedrepository.MockedPlans, mockedrepository.MockedImageData, mockedrepository.MockedImageUploadApiCalls)
 	customerService := newCustomerService(appMockRepository.CustomerRepository, appMockRepository.PlansRepository, appMockRepository.ImageRepository, appMockRepository.FaceMatchScoreRepository, appMockRepository.OCRRepository, appMockRepository.DailyReportsRepository, appMockRepository.RedisRepository)
 
 	testCases := []struct {
@@ -122,8 +121,6 @@ func TestCustomerService_GetCustomerByCredendials(t *testing.T) {
 			if err == nil {
 				t.Fatal(testCase.failedMessage)
 			} else {
-				fmt.Println(testCase.expectedError.Error())
-				fmt.Println(err.Error())
 				if !reflect.DeepEqual(testCase.expectedError, err) {
 					t.Fatal(testCase.failedMessage)
 				}

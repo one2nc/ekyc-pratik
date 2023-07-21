@@ -48,10 +48,10 @@ type ImageService struct {
 	faceMatchScoreRepository repository.IFaceMatchScoreRepository
 	ocrRepository            repository.IOCRRepository
 	ocrService               *OCRService
-	minioService             *MinioService
+	minioService             IMinioService
 }
 
-func newImageService(imageRepository repository.IImageRepository, plansRepository repository.IPlansRepository, faceMatchScoreRepository repository.IFaceMatchScoreRepository, ocrRepository repository.IOCRRepository, ocrService *OCRService, minioService *MinioService) *ImageService {
+func newImageService(imageRepository repository.IImageRepository, plansRepository repository.IPlansRepository, faceMatchScoreRepository repository.IFaceMatchScoreRepository, ocrRepository repository.IOCRRepository, ocrService *OCRService, minioService IMinioService) *ImageService {
 	return &ImageService{
 		imageRepository:          imageRepository,
 		plansRepository:          plansRepository,
@@ -62,10 +62,7 @@ func newImageService(imageRepository repository.IImageRepository, plansRepositor
 	}
 }
 
-func (i *ImageService) CreateImage(image *model.Image) error {
-	err := i.imageRepository.CreateImage(image)
-	return err
-}
+
 func (i *ImageService) UploadImage(input UploadImageInput) (ImageUploadResult, error) {
 
 	plan, err := i.plansRepository.FetchPlanById(input.Customer.PlanID)
@@ -78,13 +75,6 @@ func (i *ImageService) UploadImage(input UploadImageInput) (ImageUploadResult, e
 
 	defer file.Close()
 
-	imageType := input.ImageType
-
-	if imageType == "" || !helper.IsImageTypeValid(imageType) {
-
-		return ImageUploadResult{}, errors.New("Invalid image type. valid type are face or id_card")
-
-	}
 
 	filePath := fmt.Sprintf("images/%s/%s_%s", input.Customer.ID, fmt.Sprint(time.Now().Unix()), fileInfo.Filename)
 	fileSizeBytes := fileInfo.Size
@@ -95,7 +85,7 @@ func (i *ImageService) UploadImage(input UploadImageInput) (ImageUploadResult, e
 		FilePath:      filePath,
 		FileExtension: fileExtension,
 		FileSizeMB:    float64(fileSizeBytes) / 1000,
-		ImageType:     imageType,
+		ImageType:     input.ImageType,
 	}
 
 	if err != nil {
@@ -103,9 +93,9 @@ func (i *ImageService) UploadImage(input UploadImageInput) (ImageUploadResult, e
 		return ImageUploadResult{}, err
 
 	}
-	bucketName := i.minioService.MinioConfig.ImageBucket
+
 	connectionType := "application/" + fileExtension
-	err = i.minioService.UploadFileToMinio(bucketName, filePath, file, fileSizeBytes, connectionType)
+	err = i.minioService.UploadFileToMinio( filePath, file, fileSizeBytes, connectionType)
 	if err != nil {
 
 		return ImageUploadResult{}, err
@@ -148,7 +138,7 @@ func (i *ImageService) FaceMatch(input FaceMatchInput) (FaceMatchResult, error) 
 		return FaceMatchResult{}, err
 	}
 	if len(images) != 2 {
-		return FaceMatchResult{}, errors.New("invalid image ids")
+		return FaceMatchResult{}, errors.New("Invalid image ids")
 	}
 
 	if !helper.IsImagesComparable(images[0], images[1]) {
@@ -233,7 +223,7 @@ func (i *ImageService) GetOCRData(input OCRInput) (OCRResult, error) {
 		}
 		ocrData = &model.OCRData{
 			CustomerID: input.Customer.ID,
-			ImageID1:   images[0].ID,
+			ImageID:   images[0].ID,
 			OCRData:    datatypes.JSON(jsonData),
 		}
 
@@ -262,16 +252,6 @@ func (i *ImageService) GetOCRData(input OCRInput) (OCRResult, error) {
 	}, nil
 }
 
-func (i *ImageService) CreateImageUploadAPICall(image *model.ImageUploadAPICall) error {
-	err := i.imageRepository.CreateImageUploadRecord(image)
-	return err
-}
-func (i *ImageService) FindImageForCustomer(imageIds []string, customerId string) ([]model.Image, error) {
-	images, err := i.imageRepository.FindImagesByIdForCustomer(imageIds, customerId)
-
-	return images, err
-
-}
 
 func (i *ImageService) GenerateFacteMatchScore() int {
 
