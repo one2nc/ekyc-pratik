@@ -155,7 +155,7 @@ func (c *CustomerService) CreateCustomerReports(startDate time.Time, endDate tim
 		return ErrUnknown
 
 	}
-	return ErrUnknown
+	return nil
 }
 
 func (c *CustomerService) GetAggregateReportForCustomer(startDate time.Time, endDate time.Time, customerIds []uuid.UUID) ([]repository.CustomerAggregatedReport, error) {
