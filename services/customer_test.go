@@ -15,6 +15,7 @@ import (
 )
 
 func TestCustomerService_RegisterCustomer(t *testing.T) {
+	defer TearDownTables(t)
 
 	testEmail := "customer" + helper.GenerateRandomString(5) + "@gmail.com"
 
@@ -87,6 +88,7 @@ func TestCustomerService_RegisterCustomer(t *testing.T) {
 }
 
 func TestCustomerService_GetCustomerByCredendials(t *testing.T) {
+	defer TearDownTables(t)
 	testEmail := "customer" + helper.GenerateRandomString(5) + "@gmail.com"
 	plan, err := appRepository.PlansRepository.FetchPlansByName("basic")
 	if err != nil {
@@ -160,6 +162,7 @@ func TestCustomerService_GetCustomerByCredendials(t *testing.T) {
 }
 
 func TestCustomerService_GetAggregateReportForCustomer(t *testing.T) {
+	defer TearDownTables(t)
 	testEmail := "customer" + helper.GenerateRandomString(5) + "@gmail.com"
 
 	// fetching plan

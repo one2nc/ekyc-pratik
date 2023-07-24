@@ -15,6 +15,7 @@ import (
 )
 
 func TestImageService_UploadImage(t *testing.T) {
+	defer TearDownTables(t)
 	testEmail := "customer" + helper.GenerateRandomString(5) + "@gmail.com"
 	plan, err := appRepository.PlansRepository.FetchPlansByName("basic")
 	if err != nil {
@@ -112,6 +113,7 @@ func TestImageService_UploadImage(t *testing.T) {
 }
 
 func TestImageService_FaceMatch(t *testing.T) {
+	defer TearDownTables(t)
 	testEmail := "customer" + helper.GenerateRandomString(5) + "@gmail.com"
 	plan, err := appRepository.PlansRepository.FetchPlansByName("basic")
 	if err != nil {
@@ -277,6 +279,7 @@ func TestImageService_FaceMatch(t *testing.T) {
 	}
 }
 func TestImageService_GetOCRData(t *testing.T) {
+	defer TearDownTables(t)
 	testEmail := "customer" + helper.GenerateRandomString(5) + "@gmail.com"
 	plan, err := appRepository.PlansRepository.FetchPlansByName("basic")
 	if err != nil {
