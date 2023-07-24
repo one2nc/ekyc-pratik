@@ -10,6 +10,6 @@ type ApplicationHandler struct {
 func NewApplicationHandler(applicationService *service.ApplicationService) *ApplicationHandler {
 	return &ApplicationHandler{
 		ImageHandler:    newImageHandler(applicationService.CustomerService, applicationService.ImageService),
-		CustomerHandler: newCustomerHandler(applicationService.CustomerService, applicationService.PlansService),
+		CustomerHandler: newCustomerHandler(applicationService.CustomerService),
 	}
 }

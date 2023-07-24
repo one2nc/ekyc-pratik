@@ -20,12 +20,12 @@ type Customer struct {
 }
 
 func (c *Customer) BeforeCreate(tx *gorm.DB) (err error) {
-	c.CreatedAt = time.Now()
-	c.UpdatedAt = time.Now()
+	c.CreatedAt = time.Now().UTC()
+	c.UpdatedAt = time.Now().UTC()
 	return
 }
 
 func (c *Customer) BeforeUpdate(tx *gorm.DB) (err error) {
-	c.UpdatedAt = time.Now()
+	c.UpdatedAt = time.Now().UTC()
 	return
 }

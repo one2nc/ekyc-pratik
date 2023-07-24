@@ -33,11 +33,13 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	// Initialize applocation service
-	appService, err := service.NewApplicationService(applicationRepository)
+	// Initialize application service
+	minioConfig := config.NewMinioConfig()
+	minioService, err := service.NewMinioService(minioConfig)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+	appService := service.NewApplicationService(applicationRepository, minioService)
 
 	// Register cron jobs
 	cronConfig := config.NewCronConfig()

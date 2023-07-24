@@ -3,6 +3,7 @@ package db
 import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
 )
 
@@ -14,6 +15,7 @@ func InitiateDB() (*gorm.DB, error) {
 	}
 
 	db, err := gorm.Open(postgres.Open(dbConfig.connString), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Silent),
 		NamingStrategy: schema.NamingStrategy{
 			TablePrefix:   "ekyc_schema.", // schema name
 			SingularTable: false,

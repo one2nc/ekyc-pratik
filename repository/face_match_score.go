@@ -64,7 +64,6 @@ func (i *FaceMatchScoreRepository) GetFaceMatchAPIReport(startDate time.Time, en
 	}
 	defer rows.Close()
 
-	// Iterate over the rows and retrieve the results
 	for rows.Next() {
 		result := FaceMatchAPIReport{}
 		err := i.dbInstance.ScanRows(rows, &result)

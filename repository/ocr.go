@@ -68,7 +68,6 @@ func (i *OCRRepository) GetOCRAPIReport(startDate time.Time, endDate time.Time) 
 	}
 	defer rows.Close()
 
-	// Iterate over the rows and retrieve the results
 	for rows.Next() {
 		result := OCRAPIReport{}
 		err := i.dbInstance.ScanRows(rows, &result)

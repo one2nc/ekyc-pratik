@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"go-ekyc/handlers/response"
 	"go-ekyc/helper"
 	service "go-ekyc/services"
 	"net/http"
@@ -22,11 +23,13 @@ func AuthMiddleware(customerService *service.CustomerService) func(*gin.Context)
 
 		customer, err := customerService.GetCustomerByCredendials(helper.GetMD5Hash(accessKey), helper.GetMD5Hash(secretKey))
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"errorMessages": []string{err.Error()},
+			status, errMsg := response.GetHttpStatusAndError(err)
+			c.AbortWithStatusJSON(status, gin.H{
+				"errorMessages": []string{errMsg.Error()},
 			})
-
 			return
+
+			
 		}
 		c.Set("customer", customer)
 

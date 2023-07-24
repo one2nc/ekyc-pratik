@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"go-ekyc/handlers/requests"
+	"go-ekyc/handlers/response"
 	"go-ekyc/helper"
 	"go-ekyc/model"
 	"go-ekyc/repository"
@@ -15,13 +16,11 @@ import (
 
 type CustomerHandlers struct {
 	CustomerService service.CustomerService
-	PlansService    service.PlansService
 }
 
-func newCustomerHandler(customerService *service.CustomerService, plansService *service.PlansService) *CustomerHandlers {
+func newCustomerHandler(customerService *service.CustomerService) *CustomerHandlers {
 	return &CustomerHandlers{
 		CustomerService: *customerService,
-		PlansService:    *plansService,
 	}
 }
 
@@ -31,7 +30,7 @@ func (cc *CustomerHandlers) RegisterCustomer(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&signupRequest); err != nil {
 
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessages": helper.ErrorParser(err)})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessages": helper.ErrorParser(err, &signupRequest)})
 		return
 	}
 
@@ -41,8 +40,9 @@ func (cc *CustomerHandlers) RegisterCustomer(c *gin.Context) {
 		CustomerName:  signupRequest.Name,
 	})
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"errorMessages": []string{err.Error()},
+		status, errMsg := response.GetHttpStatusAndError(err)
+		c.AbortWithStatusJSON(status, gin.H{
+			"errorMessages": []string{errMsg.Error()},
 		})
 		return
 	}
@@ -61,7 +61,7 @@ func (i *CustomerHandlers) GetAggregatedReport(c *gin.Context) {
 	var reportsRequest requests.ReportsRequest
 
 	if err := c.ShouldBindQuery(&reportsRequest); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessages": helper.ErrorParser(err)})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessages": helper.ErrorParser(err, &reportsRequest)})
 		return
 	}
 	startDate, err := time.Parse("2006-01-02 15:04:05", reportsRequest.StartDate)
@@ -81,7 +81,10 @@ func (i *CustomerHandlers) GetAggregatedReport(c *gin.Context) {
 	results, err := i.CustomerService.GetAggregateReportForCustomer(startDate, endDate, []uuid.UUID{customerModel.ID})
 
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessages": err.Error()})
+		status, errMsg := response.GetHttpStatusAndError(err)
+		c.AbortWithStatusJSON(status, gin.H{
+			"errorMessages": []string{errMsg.Error()},
+		})
 		return
 	}
 
@@ -93,13 +96,12 @@ func (i *CustomerHandlers) GetAggregatedReport(c *gin.Context) {
 
 }
 func (i *CustomerHandlers) GetAggregatedReportForAllCustomers(c *gin.Context) {
-	// customer, _ := c.Get("customer")
-	// customerModel := customer.(model.Customer)
+	
 
 	var reportsRequest requests.ReportsRequest
 
 	if err := c.ShouldBindQuery(&reportsRequest); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessages": helper.ErrorParser(err)})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessages": helper.ErrorParser(err, &reportsRequest)})
 		return
 	}
 	startDate, err := time.Parse("2006-01-02 15:04:05", reportsRequest.StartDate)

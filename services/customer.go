@@ -1,7 +1,6 @@
 package service
 
 import (
-	"errors"
 	"go-ekyc/helper"
 	"go-ekyc/model"
 	"go-ekyc/repository"
@@ -51,18 +50,18 @@ func (c *CustomerService) RegisterCustomer(serviceInput RegisterServiceInput) (R
 
 	if err != nil {
 
-		return RegisterCustomerResult{}, errors.New("error while fetching plan")
+		return RegisterCustomerResult{}, ErrPlanNotFound
 	}
 
 	customer, err := c.customerRepository.GetCustomerByEmail(serviceInput.CustomerEmail)
 	if err != nil && err.Error() != gorm.ErrRecordNotFound.Error() {
 
-		return RegisterCustomerResult{}, errors.New("error while fetching customer")
+		return RegisterCustomerResult{}, ErrUnknown
 
 	}
 	if customer != (model.Customer{}) {
 
-		return RegisterCustomerResult{}, errors.New("email is already registered")
+		return RegisterCustomerResult{}, ErrEmailExists
 	}
 	accessKey := helper.GenerateRandomString(10)
 	secretKey := helper.GenerateRandomString(20)
@@ -78,21 +77,24 @@ func (c *CustomerService) RegisterCustomer(serviceInput RegisterServiceInput) (R
 
 	if err != nil {
 
-		return RegisterCustomerResult{}, err
+		return RegisterCustomerResult{}, ErrUnknown
 	}
 
 	return RegisterCustomerResult{
 		AccessKey: accessKey,
 		SecretKey: secretKey,
-	}, err
+	}, nil
 }
 
 func (c *CustomerService) GetCustomerByCredendials(accessKey string, secretKey string) (model.Customer, error) {
 
 	customer, err := c.customerRepository.GetCustomerByCredendials(accessKey, secretKey)
 	if err != nil {
-		return customer, errors.New("error while fetching customer")
 
+		if err == gorm.ErrRecordNotFound {
+			return customer, ErrCustomerNotFound
+		}
+		return customer, ErrUnknown
 	}
 	return customer, nil
 }
@@ -100,26 +102,27 @@ func (c *CustomerService) GetCustomerByCredendials(accessKey string, secretKey s
 func (c *CustomerService) CreateCustomerReports(startDate time.Time, endDate time.Time) error {
 	customers, err := c.customerRepository.GetCustomersWithPlans()
 	if err != nil {
-		return err
+		return ErrUnknown
 	}
 	// get image upload charges
 	imageUploadCharge, err := c.imageRepository.GetImageUploadAPIReport(startDate, endDate)
 	if err != nil {
-		return err
+		return ErrUnknown
 
 	}
 	// get face-macth charges
 	faceMatchApiCharges, err := c.faceMatchRepository.GetFaceMatchAPIReport(startDate, endDate)
 	if err != nil {
-		return err
+		return ErrUnknown
 
 	}
 	// get ocr charges
 	ocrApiCharges, err := c.ocrRepository.GetOCRAPIReport(startDate, endDate)
 	if err != nil {
-		return err
+		return ErrUnknown
 
 	}
+
 	// create data for bulk upload
 	reports := []model.DailyReport{}
 	for _, customer := range customers {
@@ -149,10 +152,10 @@ func (c *CustomerService) CreateCustomerReports(startDate time.Time, endDate tim
 	}
 	err = c.DailyReportRepository.BulkCreateDailyReports(reports)
 	if err != nil {
-		return err
+		return ErrUnknown
 
 	}
-	return err
+	return ErrUnknown
 }
 
 func (c *CustomerService) GetAggregateReportForCustomer(startDate time.Time, endDate time.Time, customerIds []uuid.UUID) ([]repository.CustomerAggregatedReport, error) {
@@ -163,6 +166,10 @@ func (c *CustomerService) GetAggregateReportForCustomer(startDate time.Time, end
 		reports[i].StartDate = startDate
 		reports[i].EndDate = endDate
 	}
-	return reports, err
+
+	if err != nil {
+		return reports, ErrUnknown
+	}
+	return reports, nil
 
 }

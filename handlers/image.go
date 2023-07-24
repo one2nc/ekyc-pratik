@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"go-ekyc/handlers/requests"
+	"go-ekyc/handlers/response"
 	"go-ekyc/helper"
 	"go-ekyc/model"
 	service "go-ekyc/services"
@@ -20,10 +21,12 @@ func (i *ImageHandlers) UplaodImage(c *gin.Context) {
 	customer, _ := c.Get("customer")
 	customerModel := customer.(model.Customer)
 
-	// fetch plan for calculations
 	file, fileInfo, err := c.Request.FormFile("image")
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Failed to retrieve image"})
+		status, errMsg := response.GetHttpStatusAndError(err)
+		c.AbortWithStatusJSON(status, gin.H{
+			"errorMessages": []string{errMsg.Error()},
+		})
 		return
 	}
 	defer file.Close()
@@ -31,6 +34,7 @@ func (i *ImageHandlers) UplaodImage(c *gin.Context) {
 	imageType := c.Request.PostFormValue("image_type")
 
 	if imageType == "" || !helper.IsImageTypeValid(imageType) {
+
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"errorMessages": []string{"Invalid image type. valid type are face or id_card"},
 		})
@@ -45,8 +49,9 @@ func (i *ImageHandlers) UplaodImage(c *gin.Context) {
 	})
 
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"errorMessages": []string{err.Error()},
+		status, errMsg := response.GetHttpStatusAndError(err)
+		c.AbortWithStatusJSON(status, gin.H{
+			"errorMessages": []string{errMsg.Error()},
 		})
 		return
 	}
@@ -63,12 +68,12 @@ func (i *ImageHandlers) FaceMatch(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&faceMatchRequest); err != nil {
 
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessages": helper.ErrorParser(err)})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessages": helper.ErrorParser(err, &faceMatchRequest)})
 		return
 	}
 
 	if faceMatchRequest.ImageId1 == faceMatchRequest.ImageId2 {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessages": []string{"Cannot use same ids"}})
+		c.AbortWithStatusJSON(http.StatusUnprocessableEntity, gin.H{"errorMessages": []string{"cannot use same ids"}})
 		return
 	}
 	results, err := i.ImageService.FaceMatch(service.FaceMatchInput{
@@ -78,8 +83,12 @@ func (i *ImageHandlers) FaceMatch(c *gin.Context) {
 	})
 
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessages": []string{err.Error()}})
+		status, errMsg := response.GetHttpStatusAndError(err)
+		c.AbortWithStatusJSON(status, gin.H{
+			"errorMessages": []string{errMsg.Error()},
+		})
 		return
+
 	}
 	c.AbortWithStatusJSON(http.StatusCreated, gin.H{"faceMatchScore": results.Score})
 
@@ -91,15 +100,15 @@ func (i *ImageHandlers) GetOcrData(c *gin.Context) {
 	var ocrRequest requests.OCRRequest
 
 	if err := c.ShouldBindJSON(&ocrRequest); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessages": helper.ErrorParser(err)})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errorMessages": helper.ErrorParser(err, &ocrRequest)})
 		return
 	}
 
-	// fetch plan for calculations
 	result, err := i.ImageService.GetOCRData(service.OCRInput{Customer: customerModel, ImageId: ocrRequest.ImageId1})
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"errorMessages": []string{err.Error()},
+		status, errMsg := response.GetHttpStatusAndError(err)
+		c.AbortWithStatusJSON(status, gin.H{
+			"errorMessages": []string{errMsg.Error()},
 		})
 		return
 	}

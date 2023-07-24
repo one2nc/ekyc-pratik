@@ -13,6 +13,7 @@ type IImageRepository interface {
 	CreateImageUploadRecord(imageUploadData *model.ImageUploadAPICall) error
 	FindImagesByIdForCustomer(imageIds []string, customerId string) ([]model.Image, error)
 	GetImageUploadAPIReport(startDate time.Time, endDate time.Time) (map[uuid.UUID]ImageUploadAPIReport, error)
+	CreateBulkImage(image *[]model.Image) error
 }
 type ImageUploadAPIReport struct {
 	CustomerId         uuid.UUID
@@ -24,6 +25,7 @@ type ImageUploadAPIReport struct {
 type ImageRepository struct {
 	dbInstance *gorm.DB
 }
+
 func newImageRepository(db *gorm.DB) IImageRepository {
 	return &ImageRepository{
 		dbInstance: db,
@@ -31,6 +33,13 @@ func newImageRepository(db *gorm.DB) IImageRepository {
 }
 
 func (i *ImageRepository) CreateImage(image *model.Image) error {
+
+	result := i.dbInstance.Create(&image)
+
+	return result.Error
+
+}
+func (i *ImageRepository) CreateBulkImage(image *[]model.Image) error {
 
 	result := i.dbInstance.Create(&image)
 
@@ -52,7 +61,6 @@ func (i *ImageRepository) FindImagesByIdForCustomer(imageIds []string, customerI
 	return images, result.Error
 }
 
-
 func (i *ImageRepository) GetImageUploadAPIReport(startDate time.Time, endDate time.Time) (map[uuid.UUID]ImageUploadAPIReport, error) {
 
 	rows, err := i.dbInstance.Table("ekyc_schema.image_upload_api_calls").
@@ -68,10 +76,10 @@ func (i *ImageRepository) GetImageUploadAPIReport(startDate time.Time, endDate t
 	}
 	defer rows.Close()
 
-	// Iterate over the rows and retrieve the results
 	for rows.Next() {
 		result := ImageUploadAPIReport{}
 		err := i.dbInstance.ScanRows(rows, &result)
+
 		if err != nil {
 			return results, err
 		}
@@ -79,5 +87,3 @@ func (i *ImageRepository) GetImageUploadAPIReport(startDate time.Time, endDate t
 	}
 	return results, nil
 }
-
-

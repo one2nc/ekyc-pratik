@@ -1,7 +1,6 @@
 package service
 
 import (
-	"go-ekyc/model"
 	"go-ekyc/repository"
 
 	"github.com/go-faker/faker/v4"
@@ -11,25 +10,6 @@ type OCRService struct {
 	OCRRepository repository.IOCRRepository
 }
 
-func (o *OCRService) CreateOCRData(ocrData *model.OCRData) error {
-
-	err := o.OCRRepository.CreateOCRData(ocrData)
-
-	return err
-}
-func (o *OCRService) GetOCRData(imageId string, customerId string) (*model.OCRData, error) {
-
-	ocerData, err := o.OCRRepository.GetOCRDataForCustomerByImageId(imageId, customerId)
-
-	return ocerData, err
-}
-
-func (o *OCRService) CreateOcrAPICall(ocrAPICallData *model.OCRAPICalls) error {
-
-	err := o.OCRRepository.CreateOcrAPICall(ocrAPICallData)
-
-	return err
-}
 func (o *OCRService) OCRExtractData() (map[string]interface{}, error) {
 
 	user := struct {

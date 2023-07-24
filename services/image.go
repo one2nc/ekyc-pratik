@@ -2,7 +2,6 @@ package service
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"go-ekyc/helper"
 	"go-ekyc/model"
@@ -39,7 +38,7 @@ type FaceMatchResult struct {
 	Score int
 }
 type OCRResult struct {
-	Data interface{}
+	Data datatypes.JSON
 }
 
 type ImageService struct {
@@ -62,19 +61,17 @@ func newImageService(imageRepository repository.IImageRepository, plansRepositor
 	}
 }
 
-
 func (i *ImageService) UploadImage(input UploadImageInput) (ImageUploadResult, error) {
 
 	plan, err := i.plansRepository.FetchPlanById(input.Customer.PlanID)
 
 	if err != nil {
-		return ImageUploadResult{}, err
+		return ImageUploadResult{}, ErrPlanNotFound
 	}
 
 	file, fileInfo := input.File, input.FileInfo
 
 	defer file.Close()
-
 
 	filePath := fmt.Sprintf("images/%s/%s_%s", input.Customer.ID, fmt.Sprint(time.Now().Unix()), fileInfo.Filename)
 	fileSizeBytes := fileInfo.Size
@@ -88,17 +85,11 @@ func (i *ImageService) UploadImage(input UploadImageInput) (ImageUploadResult, e
 		ImageType:     input.ImageType,
 	}
 
-	if err != nil {
-
-		return ImageUploadResult{}, err
-
-	}
-
 	connectionType := "application/" + fileExtension
-	err = i.minioService.UploadFileToMinio( filePath, file, fileSizeBytes, connectionType)
+	err = i.minioService.UploadFileToMinio(filePath, file, fileSizeBytes, connectionType)
 	if err != nil {
 
-		return ImageUploadResult{}, err
+		return ImageUploadResult{}, ErrUnknown
 
 	}
 
@@ -106,7 +97,7 @@ func (i *ImageService) UploadImage(input UploadImageInput) (ImageUploadResult, e
 
 	if err != nil {
 
-		return ImageUploadResult{}, err
+		return ImageUploadResult{}, ErrUnknown
 
 	}
 
@@ -120,7 +111,7 @@ func (i *ImageService) UploadImage(input UploadImageInput) (ImageUploadResult, e
 	err = i.imageRepository.CreateImageUploadRecord(&imageUploadAPICall)
 
 	if err != nil {
-		return ImageUploadResult{}, err
+		return ImageUploadResult{}, ErrUnknown
 	}
 
 	return ImageUploadResult{ImageId: imageData.ID}, nil
@@ -129,7 +120,7 @@ func (i *ImageService) UploadImage(input UploadImageInput) (ImageUploadResult, e
 func (i *ImageService) FaceMatch(input FaceMatchInput) (FaceMatchResult, error) {
 	plan, err := i.plansRepository.FetchPlanById(input.Customer.PlanID)
 	if err != nil {
-		return FaceMatchResult{}, errors.New("Failed to fetch plan")
+		return FaceMatchResult{}, ErrPlanNotFound
 	}
 
 	images, err := i.imageRepository.FindImagesByIdForCustomer([]string{input.ImageId1, input.ImageId2}, input.Customer.ID.String())
@@ -138,18 +129,18 @@ func (i *ImageService) FaceMatch(input FaceMatchInput) (FaceMatchResult, error) 
 		return FaceMatchResult{}, err
 	}
 	if len(images) != 2 {
-		return FaceMatchResult{}, errors.New("Invalid image ids")
+		return FaceMatchResult{}, ErrImageNotFound
 	}
 
 	if !helper.IsImagesComparable(images[0], images[1]) {
-		return FaceMatchResult{}, errors.New("Invalid image type")
+		return FaceMatchResult{}, ErrInvalidImageType
 	}
 
 	faceMatchScoreRecord, err := i.faceMatchScoreRepository.FetchScoreByImageAndCustomerId(input.ImageId1, input.ImageId2, input.Customer.ID.String())
 
 	if err != nil {
 		if gorm.ErrRecordNotFound.Error() != err.Error() {
-			return FaceMatchResult{}, err
+			return FaceMatchResult{}, ErrUnknown
 		}
 
 	}
@@ -166,7 +157,7 @@ func (i *ImageService) FaceMatch(input FaceMatchInput) (FaceMatchResult, error) 
 
 		err = i.faceMatchScoreRepository.CreateFaceMatchScore(faceMatchScoreRecord)
 		if err != nil {
-			return FaceMatchResult{}, err
+			return FaceMatchResult{}, ErrUnknown
 		}
 	}
 	faceMatchApiData := model.FaceMatchAPICall{
@@ -176,9 +167,9 @@ func (i *ImageService) FaceMatch(input FaceMatchInput) (FaceMatchResult, error) 
 	}
 	err = i.faceMatchScoreRepository.CreateFaceMatchScoreAPIRecord(&faceMatchApiData)
 	if err != nil {
-		return FaceMatchResult{}, err
+		return FaceMatchResult{}, ErrUnknown
 	}
-	return FaceMatchResult{Score: faceMatchScoreRecord.Score}, err
+	return FaceMatchResult{Score: faceMatchScoreRecord.Score}, nil
 }
 
 func (i *ImageService) GetOCRData(input OCRInput) (OCRResult, error) {
@@ -186,27 +177,27 @@ func (i *ImageService) GetOCRData(input OCRInput) (OCRResult, error) {
 	plan, err := i.plansRepository.FetchPlanById(input.Customer.PlanID)
 
 	if err != nil {
-		return OCRResult{}, errors.New("Failed to fetch plan")
+		return OCRResult{}, ErrPlanNotFound
 	}
 
 	images, err := i.imageRepository.FindImagesByIdForCustomer([]string{input.ImageId}, input.Customer.ID.String())
 
 	if err != nil {
-		return OCRResult{}, err
+		return OCRResult{}, ErrUnknown
 	}
 	if len(images) != 1 {
-		return OCRResult{}, errors.New("Invalid image id")
+		return OCRResult{}, ErrImageNotFound
 	}
 
 	if images[0].ImageType != "id_card" {
-		return OCRResult{}, errors.New("OCR can be done only on image of type ID")
+		return OCRResult{}, ErrInvalidImageType
 	}
 
 	ocrData, err := i.ocrRepository.GetOCRDataForCustomerByImageId(input.ImageId, input.Customer.ID.String())
 
 	if err != nil {
 		if gorm.ErrRecordNotFound.Error() != err.Error() {
-			return OCRResult{}, err
+			return OCRResult{}, ErrUnknown
 		}
 
 	}
@@ -214,23 +205,23 @@ func (i *ImageService) GetOCRData(input OCRInput) (OCRResult, error) {
 
 		data, err := i.ocrService.OCRExtractData()
 		if err != nil {
-			return OCRResult{}, errors.New("Error while extracting data")
+			return OCRResult{}, ErrUnknown
 
 		}
 		jsonData, err := json.Marshal(data)
 		if err != nil {
-			return OCRResult{}, errors.New("Error while extracting data")
+			return OCRResult{}, ErrUnknown
 		}
 		ocrData = &model.OCRData{
 			CustomerID: input.Customer.ID,
-			ImageID:   images[0].ID,
+			ImageID:    images[0].ID,
 			OCRData:    datatypes.JSON(jsonData),
 		}
 
 		err = i.ocrRepository.CreateOCRData(ocrData)
 
 		if err != nil {
-			return OCRResult{}, err
+			return OCRResult{}, ErrUnknown
 
 		}
 	}
@@ -244,7 +235,7 @@ func (i *ImageService) GetOCRData(input OCRInput) (OCRResult, error) {
 
 	err = i.ocrRepository.CreateOcrAPICall(ocrAPICallData)
 	if err != nil {
-		return OCRResult{}, err
+		return OCRResult{}, ErrUnknown
 
 	}
 	return OCRResult{
@@ -252,11 +243,10 @@ func (i *ImageService) GetOCRData(input OCRInput) (OCRResult, error) {
 	}, nil
 }
 
-
 func (i *ImageService) GenerateFacteMatchScore() int {
 
 	rand.Seed(time.Now().UnixNano())
-	randomNumber := rand.Intn(101)
+	randomNumber := rand.Intn(100) + 1
 
 	return randomNumber
 

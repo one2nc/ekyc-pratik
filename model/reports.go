@@ -28,12 +28,12 @@ func (d *DailyReport) TableName() string {
 	return "ekyc_schema.daily_reports_table"
 }
 func (d *DailyReport) BeforeCreate(tx *gorm.DB) (err error) {
-	d.CreatedAt = time.Now()
-	d.UpdatedAt = time.Now()
+	d.CreatedAt = time.Now().UTC()
+	d.UpdatedAt = time.Now().UTC()
 	return
 }
 
 func (d *DailyReport) BeforeUpdate(tx *gorm.DB) (err error) {
-	d.UpdatedAt = time.Now()
+	d.UpdatedAt = time.Now().UTC()
 	return
 }

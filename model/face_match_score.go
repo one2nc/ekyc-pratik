@@ -17,19 +17,18 @@ type FaceMatchScore struct {
 	UpdatedAt  time.Time `gorm:"not null"`
 }
 
-// Define the foreign key relationships
 func (FaceMatchScore) TableName() string {
 	return "ekyc_schema.face_match_score"
 }
 
 func (fms *FaceMatchScore) BeforeCreate(tx *gorm.DB) error {
-	fms.CreatedAt = time.Now()
-	fms.UpdatedAt = time.Now()
+	fms.CreatedAt = time.Now().UTC()
+	fms.UpdatedAt = time.Now().UTC()
 	return nil
 }
 
 func (fms *FaceMatchScore) BeforeUpdate(tx *gorm.DB) error {
-	fms.UpdatedAt = time.Now()
+	fms.UpdatedAt = time.Now().UTC()
 	return nil
 }
 
@@ -42,18 +41,17 @@ type FaceMatchAPICall struct {
 	UpdatedAt      time.Time `gorm:"not null"`
 }
 
-// Define the foreign key relationships
 func (FaceMatchAPICall) TableName() string {
 	return "ekyc_schema.face_match_api_calls"
 }
 
 func (fm *FaceMatchAPICall) BeforeCreate(tx *gorm.DB) error {
-	fm.CreatedAt = time.Now()
-	fm.UpdatedAt = time.Now()
+	fm.CreatedAt = time.Now().UTC()
+	fm.UpdatedAt = time.Now().UTC()
 	return nil
 }
 
 func (fm *FaceMatchAPICall) BeforeUpdate(tx *gorm.DB) error {
-	fm.UpdatedAt = time.Now()
+	fm.UpdatedAt = time.Now().UTC()
 	return nil
 }

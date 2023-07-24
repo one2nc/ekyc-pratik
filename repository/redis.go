@@ -17,8 +17,8 @@ func newRedisRepository(redisConfig config.RedisConfig) (*RedisRepository, error
 
 	redisClient := redis.NewClient(&redis.Options{
 		Addr:     redisConfig.Endpoint,
-		Password: "", // no password set
-		DB:       0,  // use default DB
+		Password: "", 
+		DB:       0,  
 	})
 
 	_, err := redisClient.Ping(context.Background()).Result()

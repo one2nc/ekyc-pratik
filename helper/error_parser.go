@@ -3,12 +3,13 @@ package helper
 import (
 	"errors"
 	"io"
+	"reflect"
 	"strings"
 
 	"github.com/go-playground/validator/v10"
 )
 
-func ErrorParser(err error) []string {
+func ErrorParser(err error, object interface{}) []string {
 
 	errorMessagess := []string{}
 
@@ -25,20 +26,34 @@ func ErrorParser(err error) []string {
 		return errorMessagess
 	}
 	for _, e := range errs {
-		// can translate each error one at a time.
 		field := e.Field()
 		tag := e.Tag()
+
+		structField, ok := reflect.TypeOf(object).Elem().FieldByName(field)
+		if !ok {
+			continue
+		}
+		key := ""
+		jsonKey, ok := structField.Tag.Lookup("json")
+		if ok {
+			key = jsonKey
+		} else {
+			formKey, ok := structField.Tag.Lookup("form")
+			if ok {
+				key = formKey
+			}
+		}
 
 		var errorMsg string
 		switch tag {
 		case "required":
-			errorMsg = field + " is required"
+			errorMsg = key + " is required"
 		case "oneof":
-			errorMsg = field + " should be one of (" + strings.ReplaceAll(e.Param(), " ", "/") + ")"
+			errorMsg = key + " should be one of (" + strings.ReplaceAll(e.Param(), " ", "/") + ")"
 		case "email":
-			errorMsg = "Inavlid email"
+			errorMsg = key + ": " + "Inavlid email"
 		case "uuid":
-			errorMsg = "Inavlid uuid"
+			errorMsg = key + ": " + "Inavlid uuid"
 		default:
 			errorMsg = ""
 		}

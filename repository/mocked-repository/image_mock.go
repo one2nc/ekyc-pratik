@@ -26,6 +26,15 @@ func (i *ImageRepositoryMock) CreateImage(image *model.Image) error {
 	return nil
 
 }
+func (i *ImageRepositoryMock) CreateBulkImage(images *[]model.Image) error {
+
+	for _, image := range *images {
+
+		image.ID = uuid.New()
+	}
+	return nil
+
+}
 func (i *ImageRepositoryMock) CreateImageUploadRecord(imageUploadData *model.ImageUploadAPICall) error {
 
 	imageUploadData.ID = uuid.New()
