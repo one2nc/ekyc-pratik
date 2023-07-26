@@ -12,6 +12,7 @@ type ApplicationRepository struct {
 	OCRRepository            IOCRRepository
 	DailyReportsRepository   IDailyReportsRepository
 	RedisRepository          RedisRepository
+	CronRegistryRepository   ICronRegistryRepository
 }
 
 func NewApplicationRepository(db *gorm.DB) (*ApplicationRepository, error) {
@@ -29,6 +30,7 @@ func NewApplicationRepository(db *gorm.DB) (*ApplicationRepository, error) {
 		FaceMatchScoreRepository: newFaceMatchScoreRepository(db),
 		OCRRepository:            newOCRRepositoty(db),
 		DailyReportsRepository:   newDailyReportsRepository(db),
+		CronRegistryRepository:   newCronRegistryRepository(db),
 		// RedisRepository:          *redisRepository,
 	}, nil
 }

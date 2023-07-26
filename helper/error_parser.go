@@ -51,9 +51,9 @@ func ErrorParser(err error, object interface{}) []string {
 		case "oneof":
 			errorMsg = key + " should be one of (" + strings.ReplaceAll(e.Param(), " ", "/") + ")"
 		case "email":
-			errorMsg = key + ": " + "Inavlid email"
+			errorMsg = key + ": " + "Invalid email"
 		case "uuid":
-			errorMsg = key + ": " + "Inavlid uuid"
+			errorMsg = key + ": " + "Invalid uuid"
 		default:
 			errorMsg = ""
 		}

@@ -17,7 +17,7 @@ type IFaceMatchScoreRepository interface{
 	CreateFaceMatchScore(faceScoreData *model.FaceMatchScore) error
 	CreateFaceMatchScoreAPIRecord(faceMatchApiData *model.FaceMatchAPICall) error
 	FetchScoreByImageAndCustomerId(imageId1 string, imageId2 string, customerId string) (*model.FaceMatchScore, error)
-	GetFaceMatchAPIReport(startDate time.Time, endDate time.Time) (map[uuid.UUID]FaceMatchAPIReport, error)
+	GetFaceMatchAPIReport(startDate time.Time, endDate time.Time, customerIds []uuid.UUID) (map[uuid.UUID]FaceMatchAPIReport, error)
 }
 type FaceMatchScoreRepository struct {
 	dbInstance *gorm.DB
@@ -50,11 +50,11 @@ func (f *FaceMatchScoreRepository) FetchScoreByImageAndCustomerId(imageId1 strin
 	return &faceImageScore, nil
 }
 
-func (i *FaceMatchScoreRepository) GetFaceMatchAPIReport(startDate time.Time, endDate time.Time) (map[uuid.UUID]FaceMatchAPIReport, error) {
+func (i *FaceMatchScoreRepository) GetFaceMatchAPIReport(startDate time.Time, endDate time.Time, customerIds []uuid.UUID)  (map[uuid.UUID]FaceMatchAPIReport, error) {
 
 	rows, err := i.dbInstance.Table("ekyc_schema.face_match_api_calls").
 		Select("face_match_api_calls.customer_id, SUM(api_call_charges) as total_api_charge, COUNT(*) as total_api_count").
-		Where("face_match_api_calls.created_at BETWEEN ? AND ?", startDate, endDate).
+		Where("face_match_api_calls.created_at BETWEEN ? AND ? AND customer_id IN (?)", startDate, endDate,customerIds).
 		Group("face_match_api_calls.customer_id").
 		Rows()
 

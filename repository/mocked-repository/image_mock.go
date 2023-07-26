@@ -58,7 +58,7 @@ func (i *ImageRepositoryMock) FindImagesByIdForCustomer(imageIds []string, custo
 	}
 	return images, nil
 }
-func (i *ImageRepositoryMock) GetImageUploadAPIReport(startDate time.Time, endDate time.Time) (map[uuid.UUID]repository.ImageUploadAPIReport, error) {
+func (i *ImageRepositoryMock) GetImageUploadAPIReport(startDate time.Time, endDate time.Time , customerIds []uuid.UUID) (map[uuid.UUID]repository.ImageUploadAPIReport, error) {
 
 	return map[uuid.UUID]repository.ImageUploadAPIReport{}, nil
 }

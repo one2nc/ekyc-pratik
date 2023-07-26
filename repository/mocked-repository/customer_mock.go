@@ -3,6 +3,7 @@ package mockedrepository
 import (
 	"go-ekyc/model"
 	"go-ekyc/repository"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -42,7 +43,7 @@ func (c CustomerMockRepository) GetCustomerByCredendials(accessKey string, secre
 	}
 	return model.Customer{}, gorm.ErrRecordNotFound
 }
-func (c CustomerMockRepository) GetCustomersWithPlans() ([]model.Customer, error) {
+func (c CustomerMockRepository) GetCustomersWithPlans(limit int, offset int, createdAt time.Time) ([]model.Customer, error) {
 
 	return c.customerList, nil
 

@@ -8,7 +8,9 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
-
+type DailyReportCronMetaData struct {
+	LastOffset int `json:"last_offset"`
+}
 type CustomerAggregatedReport struct {
 	CustomerID              uuid.UUID `json:"customer_id,omitempty"`
 	StartDate               time.Time `json:"start_date_of_report,omitempty"`
@@ -59,9 +61,9 @@ func (r *DailyReportsRepository) GetCustomersAggregatedReportByDates(startDate t
 		Joins("JOIN ekyc_schema.plans ON customers.plan_id = plans.id")
 
 	if len(customerIds) > 0 {
-		query.Where("daily_reports_table.customer_id IN (?) and daily_reports_table.created_at BETWEEN ? AND ?", customerIds, startDate, endDate)
+		query.Where("daily_reports_table.customer_id IN (?) and daily_reports_table.date_of_report BETWEEN ? AND ?", customerIds, startDate, endDate)
 	} else {
-		query.Where("daily_reports_table.created_at BETWEEN ? AND ?", startDate, endDate)
+		query.Where("daily_reports_table.date_of_report BETWEEN ? AND ?", startDate, endDate)
 	}
 
 	result := query.Group("daily_reports_table.customer_id").Group("plans.plan_name").Scan(&reports)

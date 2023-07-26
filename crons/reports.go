@@ -8,23 +8,20 @@ import (
 	"github.com/robfig/cron"
 )
 
-func scheduleReportCron(c *cron.Cron, config config.CronConfig, appService *service.ApplicationService) {
+func scheduleReportCron(c *cron.Cron, config config.CronConfig, appService *service.ApplicationService) (error){
 
-	c.AddFunc(config.DailyReportExpression, func() {
-
+err :=	c.AddFunc(config.DailyReportExpression, func() {
 		currentTime := time.Now().UTC()
 		startTime := time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day()-1, 0, 0, 0, 0, time.UTC)
 		endTime := time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day()-1, 23, 59, 59, 0, time.UTC)
-		lockKey := startTime.Unix()
 
-		acquired := appService.CustomerService.DailyReportRepository.AcquireCronLock(lockKey)
-		if acquired {
+			_ = appService.CustomerService.CreateCustomerReportsCron(startTime, endTime)
 
-			_ = appService.CustomerService.CreateCustomerReports(startTime, endTime)
-			appService.CustomerService.DailyReportRepository.ReleaseCronLock(lockKey)
-
-		}
 
 	})
 
+	if err != nil {
+		return err
+	}
+return nil
 }

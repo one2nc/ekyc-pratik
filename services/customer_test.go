@@ -162,6 +162,7 @@ func TestCustomerService_GetCustomerByCredendials(t *testing.T) {
 }
 
 func TestCustomerService_GetAggregateReportForCustomer(t *testing.T) {
+
 	defer TearDownTables(t)
 	testEmail := "customer" + helper.GenerateRandomString(5) + "@gmail.com"
 
@@ -183,6 +184,8 @@ func TestCustomerService_GetAggregateReportForCustomer(t *testing.T) {
 		t.Fatal(err.Error())
 	}
 
+	startTime := testCustomer.CreatedAt.Add(time.Millisecond * 5)
+	endTime := startTime.Add(time.Hour)
 	// preparing test file data to create image record
 	file, err := os.Open("./testdata/test_image_1.png")
 	if err != nil {
@@ -212,8 +215,6 @@ func TestCustomerService_GetAggregateReportForCustomer(t *testing.T) {
 			ImageType: "id_card",
 		},
 	}
-
-	currentStartTime := time.Now().UTC()
 
 	uploadedImageResluts := []ImageUploadResult{}
 	// creating test image record
@@ -251,11 +252,8 @@ func TestCustomerService_GetAggregateReportForCustomer(t *testing.T) {
 		t.Fatal(err.Error())
 	}
 
-	currentEndTime := time.Now().UTC()
 	// generating daily report
-	dailyReportStartTime := time.Now().UTC()
-	err = appService.CustomerService.CreateCustomerReports(currentStartTime, currentEndTime)
-	dailyReportEndTime := time.Now().UTC()
+	err = appService.CustomerService.CreateCustomerReports(startTime, endTime, 1, 0)
 
 	if err != nil {
 		t.Fatal(err.Error())
@@ -266,8 +264,8 @@ func TestCustomerService_GetAggregateReportForCustomer(t *testing.T) {
 	totalOCRCost := 1 * plan.OCRCost
 	totalApiCharge := totalImageUploadCost + totalFaceMatchCost + totalOCRCost
 	customerReports := repository.CustomerAggregatedReport{
-		StartDate:           dailyReportStartTime,
-		EndDate:             dailyReportStartTime,
+		StartDate:           startTime,
+		EndDate:             endTime,
 		CustomerID:          testCustomer.ID,
 		TotalBaseCharge:     plan.DailyBaseCost,
 		TotalFaceMatchCount: 1,
@@ -296,8 +294,8 @@ func TestCustomerService_GetAggregateReportForCustomer(t *testing.T) {
 				testCustomer.ID,
 			},
 			expectedOutput:  customerReports,
-			startDate:       currentStartTime,
-			endDate:         currentEndTime,
+			startDate:       startTime,
+			endDate:         endTime,
 			testName:        "Invoice number matched",
 			isErrorExpected: false,
 			failedMessage:   "Failed for Invoice number matched test case",
@@ -305,14 +303,13 @@ func TestCustomerService_GetAggregateReportForCustomer(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
-		result, err := appService.CustomerService.GetAggregateReportForCustomer(dailyReportStartTime, dailyReportEndTime, testCase.customerID)
-
+		result, err := appService.CustomerService.GetAggregateReportForCustomer(startTime, endTime, testCase.customerID)
 		if testCase.isErrorExpected {
 
 			if err == nil {
 				t.Fatal(testCase.failedMessage)
 			} else {
-				if !reflect.DeepEqual(testCase.expectedError, err) {
+				if !errors.Is(testCase.expectedError, err) {
 					t.Fatal(testCase.failedMessage)
 				}
 			}

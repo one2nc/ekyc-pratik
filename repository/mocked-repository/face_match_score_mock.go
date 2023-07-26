@@ -45,7 +45,7 @@ func (f *FaceMatchScoreMockRepository) FetchScoreByImageAndCustomerId(imageId1 s
 	return nil, gorm.ErrRecordNotFound
 }
 
-func (f *FaceMatchScoreMockRepository) GetFaceMatchAPIReport(startDate time.Time, endDate time.Time) (map[uuid.UUID]repository.FaceMatchAPIReport, error) {
+func (f *FaceMatchScoreMockRepository) GetFaceMatchAPIReport(startDate time.Time, endDate time.Time, customerIds []uuid.UUID) (map[uuid.UUID]repository.FaceMatchAPIReport, error) {
 
 	return map[uuid.UUID]repository.FaceMatchAPIReport{}, nil
 }

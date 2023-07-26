@@ -1,12 +1,14 @@
 package service
 
 import (
+	"encoding/json"
 	"go-ekyc/helper"
 	"go-ekyc/model"
 	"go-ekyc/repository"
 	"time"
 
 	"github.com/google/uuid"
+	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
@@ -24,24 +26,26 @@ type RegisterCustomerResult struct {
 }
 
 type CustomerService struct {
-	customerRepository    repository.ICustomerRepository
-	plansRepository       repository.IPlansRepository
-	imageRepository       repository.IImageRepository
-	faceMatchRepository   repository.IFaceMatchScoreRepository
-	ocrRepository         repository.IOCRRepository
-	DailyReportRepository repository.IDailyReportsRepository
-	RedisRepository       repository.RedisRepository
+	customerRepository     repository.ICustomerRepository
+	plansRepository        repository.IPlansRepository
+	imageRepository        repository.IImageRepository
+	faceMatchRepository    repository.IFaceMatchScoreRepository
+	ocrRepository          repository.IOCRRepository
+	DailyReportRepository  repository.IDailyReportsRepository
+	RedisRepository        repository.RedisRepository
+	CronRegistryRepository repository.ICronRegistryRepository
 }
 
-func newCustomerService(customerRepository repository.ICustomerRepository, plansRepository repository.IPlansRepository, imageRepository repository.IImageRepository, faceMatchRepository repository.IFaceMatchScoreRepository, ocrRepository repository.IOCRRepository, dailyReportRepository repository.IDailyReportsRepository, redisRepository repository.RedisRepository) *CustomerService {
+func newCustomerService(customerRepository repository.ICustomerRepository, plansRepository repository.IPlansRepository, imageRepository repository.IImageRepository, faceMatchRepository repository.IFaceMatchScoreRepository, ocrRepository repository.IOCRRepository, dailyReportRepository repository.IDailyReportsRepository, redisRepository repository.RedisRepository, cronRegistryRepository repository.ICronRegistryRepository) *CustomerService {
 	return &CustomerService{
-		customerRepository:    customerRepository,
-		plansRepository:       plansRepository,
-		imageRepository:       imageRepository,
-		faceMatchRepository:   faceMatchRepository,
-		ocrRepository:         ocrRepository,
-		DailyReportRepository: dailyReportRepository,
-		RedisRepository:       redisRepository,
+		customerRepository:     customerRepository,
+		plansRepository:        plansRepository,
+		imageRepository:        imageRepository,
+		faceMatchRepository:    faceMatchRepository,
+		ocrRepository:          ocrRepository,
+		DailyReportRepository:  dailyReportRepository,
+		RedisRepository:        redisRepository,
+		CronRegistryRepository: cronRegistryRepository,
 	}
 }
 
@@ -99,25 +103,123 @@ func (c *CustomerService) GetCustomerByCredendials(accessKey string, secretKey s
 	return customer, nil
 }
 
-func (c *CustomerService) CreateCustomerReports(startDate time.Time, endDate time.Time) error {
-	customers, err := c.customerRepository.GetCustomersWithPlans()
+func (c *CustomerService) CreateCustomerReportsCron(startDate time.Time, endDate time.Time) error {
+
+	name := "DAILY_REPORTS_CRON"
+	uniqueIdentifer := name + "_" + startDate.String()
+	createCronMetaData := repository.DailyReportCronMetaData{
+		LastOffset: 0,
+	}
+	jsonData, err := json.Marshal(&createCronMetaData)
+	if err != nil {
+		return err
+	}
+	data := model.CronRegistry{
+		Name:             name,
+		UniqueIdentifier: uniqueIdentifer,
+		Metadata:         datatypes.JSON(jsonData),
+	}
+	_, err = c.CronRegistryRepository.CreateCronRecordNX(&data)
+
+	limit := 1
+	numOfRetriesToFetchCronRecord := 1
+	maxNumOfRetriesToFetchCronRecord := 5
+	for {
+
+		tx := c.CronRegistryRepository.BeginTX()
+		if tx.Error != nil {
+			continue
+		}
+
+		cron, err := c.CronRegistryRepository.GetCronByUniqueIdTX(tx, uniqueIdentifer)
+		if err != nil {
+			c.CronRegistryRepository.RollbackTx(tx)
+			if err != gorm.ErrRecordNotFound {
+				return err
+			} else {
+				if numOfRetriesToFetchCronRecord > maxNumOfRetriesToFetchCronRecord {
+					return err
+				}
+				numOfRetriesToFetchCronRecord++
+			}
+			continue
+		}
+
+		metadata := &repository.DailyReportCronMetaData{}
+		err = json.Unmarshal(cron.Metadata, &metadata)
+		if err != nil {
+			c.CronRegistryRepository.RollbackTx(tx)
+			return err
+		}
+
+		offset := metadata.LastOffset
+		metadata.LastOffset += limit
+		updateMetadataJson, err := json.Marshal(metadata)
+		if err != nil {
+			c.CronRegistryRepository.RollbackTx(tx)
+			continue
+		}
+
+		_, err = c.CronRegistryRepository.UpdateCronMetadataByUniqueIdTX(tx, cron.UniqueIdentifier, datatypes.JSON(string(updateMetadataJson)))
+		if err != nil {
+			c.CronRegistryRepository.RollbackTx(tx)
+			continue
+		}
+
+		result := c.CronRegistryRepository.CommitTX(tx)
+
+		if result.Error != nil {
+			continue
+		}
+
+		numberOFRetries := 5
+
+		for i := 0; i < numberOFRetries; i++ {
+			err := c.CreateCustomerReports(startDate, endDate, limit, offset)
+
+			if err == nil {
+				break
+			}
+
+			if err == ErrEmptySlice {
+				return nil
+			}
+
+		}
+
+	}
+
+	// return nil
+}
+func (c *CustomerService) CreateCustomerReports(startDate time.Time, endDate time.Time, limit int, offset int) error {
+	customers, err := c.customerRepository.GetCustomersWithPlans(limit, offset, endDate)
 	if err != nil {
 		return ErrUnknown
 	}
+
+	customerIds := []uuid.UUID{}
+	for _, customer := range customers {
+		customerIds = append(customerIds, customer.ID)
+	}
+	if len(customerIds) == 0 {
+		return ErrEmptySlice
+	}
 	// get image upload charges
-	imageUploadCharge, err := c.imageRepository.GetImageUploadAPIReport(startDate, endDate)
+	imageUploadCharge, err := c.imageRepository.GetImageUploadAPIReport(startDate, endDate, customerIds)
 	if err != nil {
+
 		return ErrUnknown
 
 	}
 	// get face-macth charges
-	faceMatchApiCharges, err := c.faceMatchRepository.GetFaceMatchAPIReport(startDate, endDate)
+	faceMatchApiCharges, err := c.faceMatchRepository.GetFaceMatchAPIReport(startDate, endDate, customerIds)
 	if err != nil {
+
 		return ErrUnknown
 
 	}
 	// get ocr charges
-	ocrApiCharges, err := c.ocrRepository.GetOCRAPIReport(startDate, endDate)
+	ocrApiCharges, err := c.ocrRepository.GetOCRAPIReport(startDate, endDate, customerIds)
 	if err != nil {
 		return ErrUnknown
 
@@ -151,10 +253,13 @@ func (c *CustomerService) CreateCustomerReports(startDate time.Time, endDate tim
 		})
 	}
 	err = c.DailyReportRepository.BulkCreateDailyReports(reports)
+
 	if err != nil {
+
 		return ErrUnknown
 
 	}
+
 	return nil
 }
 

@@ -14,7 +14,7 @@ type ApplicationService struct {
 func NewApplicationService(applicationRepository *repository.ApplicationRepository, minioService IMinioService) *ApplicationService {
 
 	return &ApplicationService{
-		CustomerService:       newCustomerService(applicationRepository.CustomerRepository, applicationRepository.PlansRepository, applicationRepository.ImageRepository, applicationRepository.FaceMatchScoreRepository, applicationRepository.OCRRepository, applicationRepository.DailyReportsRepository, applicationRepository.RedisRepository),
+		CustomerService:       newCustomerService(applicationRepository.CustomerRepository, applicationRepository.PlansRepository, applicationRepository.ImageRepository, applicationRepository.FaceMatchScoreRepository, applicationRepository.OCRRepository, applicationRepository.DailyReportsRepository, applicationRepository.RedisRepository,applicationRepository.CronRegistryRepository),
 		ImageService:          newImageService(applicationRepository.ImageRepository, applicationRepository.PlansRepository, applicationRepository.FaceMatchScoreRepository, applicationRepository.OCRRepository, newOCRService(applicationRepository.OCRRepository), minioService),
 		OCRService:            newOCRService(applicationRepository.OCRRepository),
 		MinioService:          minioService,

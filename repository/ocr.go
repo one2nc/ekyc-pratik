@@ -18,7 +18,7 @@ type IOCRRepository interface {
 	CreateOCRData(ocrData *model.OCRData) error
 	GetOCRDataForCustomerByImageId(imageId string, customerId string) (*model.OCRData, error)
 	CreateOcrAPICall(ocrDataModel *model.OCRAPICalls) error
-	GetOCRAPIReport(startDate time.Time, endDate time.Time) (map[uuid.UUID]OCRAPIReport, error)
+	GetOCRAPIReport(startDate time.Time, endDate time.Time, customerIds []uuid.UUID) (map[uuid.UUID]OCRAPIReport, error)
 }
 type OCRRepository struct {
 	dbInstance *gorm.DB
@@ -54,11 +54,11 @@ func (o *OCRRepository) CreateOcrAPICall(ocrDataModel *model.OCRAPICalls) error 
 	return result.Error
 }
 
-func (i *OCRRepository) GetOCRAPIReport(startDate time.Time, endDate time.Time) (map[uuid.UUID]OCRAPIReport, error) {
+func (i *OCRRepository) GetOCRAPIReport(startDate time.Time, endDate time.Time, customerIds []uuid.UUID) (map[uuid.UUID]OCRAPIReport, error) {
 
 	rows, err := i.dbInstance.Table("ekyc_schema.ocr_api_calls").
 		Select("ocr_api_calls.customer_id, SUM(api_call_charges) as total_api_charge, COUNT(*) as total_api_count").
-		Where("ocr_api_calls.created_at BETWEEN ? AND ?", startDate, endDate).
+		Where("ocr_api_calls.created_at BETWEEN ? AND ? AND customer_id IN (?)", startDate, endDate, customerIds).
 		Group("ocr_api_calls.customer_id").
 		Rows()
 
