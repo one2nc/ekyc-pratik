@@ -103,7 +103,7 @@ func (c *CustomerService) GetCustomerByCredendials(accessKey string, secretKey s
 	return customer, nil
 }
 
-func (c *CustomerService) CreateCustomerReportsCron(startDate time.Time, endDate time.Time) error {
+func (c *CustomerService) CreateCustomerReportsCron(startDate time.Time, endDate time.Time, limit int) error {
 
 	name := "DAILY_REPORTS_CRON"
 	uniqueIdentifer := name + "_" + startDate.String()
@@ -121,7 +121,6 @@ func (c *CustomerService) CreateCustomerReportsCron(startDate time.Time, endDate
 	}
 	_, err = c.CronRegistryRepository.CreateCronRecordNX(&data)
 
-	limit := 1
 	numOfRetriesToFetchCronRecord := 1
 	maxNumOfRetriesToFetchCronRecord := 5
 	for {
